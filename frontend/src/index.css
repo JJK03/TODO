@@ -1,21 +1,23 @@
 ﻿:root {
-  --bg: #eef2f7;
-  --panel: #ffffff;
-  --panel-border: #d8dee8;
-  --text: #172033;
-  --muted: #667085;
-  --primary: #3157d5;
-  --primary-hover: #2646b7;
-  --primary-soft: #edf2ff;
-  --success: #147a53;
-  --success-bg: #e9f8f0;
-  --warning: #b45309;
-  --warning-bg: #fff7e6;
-  --danger: #b42318;
-  --danger-bg: #fff1f0;
-  --input-bg: #fbfcff;
-  --surface: #f8fafc;
-  --shadow: 0 24px 60px rgba(30, 41, 59, 0.13);
+  --bg: #18322f;
+  --panel: #f4f0e8;
+  --panel-border: #d9cec0;
+  --text: #21302e;
+  --muted: #6e7771;
+  --primary: #d65f46;
+  --primary-hover: #bd4d38;
+  --primary-soft: #ffe3dc;
+  --success: #26735c;
+  --success-bg: #dff0e8;
+  --warning: #b36b1f;
+  --warning-bg: #fff0cf;
+  --danger: #b13c3c;
+  --danger-bg: #ffe2df;
+  --input-bg: #fffaf2;
+  --surface: #ece6dc;
+  --card: #fffaf2;
+  --card-completed: #edf7f0;
+  --shadow: 0 26px 70px rgba(9, 28, 26, 0.34);
 
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
@@ -35,7 +37,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    linear-gradient(180deg, #f8fafc 0%, var(--bg) 46%, #e7ecf4 100%);
+    linear-gradient(135deg, #18322f 0%, #315349 45%, #8f4f3d 100%);
 }
 
 button,

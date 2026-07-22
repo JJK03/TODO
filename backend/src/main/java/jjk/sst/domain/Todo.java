@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,9 +28,13 @@ public class Todo {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
     }
 
     public Todo(String title, boolean completed) {
@@ -40,6 +45,7 @@ public class Todo {
     public void update(String title, boolean completed) {
         this.title = title;
         this.completed = completed;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void toggle() {

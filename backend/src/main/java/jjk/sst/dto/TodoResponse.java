@@ -12,11 +12,13 @@ public class TodoResponse {
     private String title;
     private boolean completed;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public TodoResponse(Todo todo) {
         this.id = todo.getId();
         this.title = todo.getTitle();
         this.completed = todo.isCompleted();
         this.createdAt = todo.getCreatedAt();
+        this.updatedAt = todo.getUpdatedAt();
     }
 }

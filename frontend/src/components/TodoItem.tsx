@@ -12,6 +12,50 @@ type TodoItemProps = {
   onDelete: (id: number) => void;
 };
 
+const CheckCircleIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+
+const CircleIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="8" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="m16.5 3.5 4 4L8 20H4v-4L16.5 3.5Z" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M3 6h18" />
+    <path d="M8 6V4h8v2" />
+    <path d="M6 6l1 15h10l1-15" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+  </svg>
+);
+
+const SaveIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+    <path d="M7 3v6h9" />
+    <path d="M7 21v-7h10v7" />
+  </svg>
+);
+
+const UndoIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
+  </svg>
+);
+
 export default function TodoItem({
   todo,
   isEditing,
@@ -25,15 +69,6 @@ export default function TodoItem({
 }: TodoItemProps) {
   return (
     <li className={todo.completed ? "todo-item completed" : "todo-item"}>
-      <button
-        className="status-button"
-        type="button"
-        onClick={() => onToggle(todo.id)}
-        aria-label={`${todo.title} 완료 여부 변경`}
-      >
-        <span className="status-dot" />
-      </button>
-
       {isEditing ? (
         <div className="todo-edit">
           <input
@@ -50,43 +85,79 @@ export default function TodoItem({
               }
             }}
           />
-          <button
-            className="save-button"
-            type="button"
-            onClick={() => onEditSubmit(todo.id)}
-          >
-            저장
-          </button>
-          <button
-            className="cancel-button"
-            type="button"
-            onClick={onEditCancel}
-          >
-            취소
-          </button>
         </div>
       ) : (
-        <div className="todo-content">
+        <div className="todo-text">
           <span className="todo-title">{todo.title}</span>
-          <button
-            className="edit-button"
-            type="button"
-            onClick={() => onEditStart(todo)}
-          >
-            수정
-          </button>
+          <div className="todo-dates">
+            <span className="todo-date">
+              작성: {new Date(todo.createdAt).toLocaleString()}
+            </span>
+            {todo.updatedAt && (
+              <span className="todo-date">
+                수정: {new Date(todo.updatedAt).toLocaleString()}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
-      <span className="todo-status">{todo.completed ? "완료" : "미완료"}</span>
-
       <button
-        className="delete-button"
+        className="status-button icon-button"
         type="button"
-        onClick={() => onDelete(todo.id)}
+        onClick={() => onToggle(todo.id)}
+        aria-label={`${todo.title} ${todo.completed ? "미완료로 변경" : "완료로 변경"}`}
+        title={todo.completed ? "완료" : "미완료"}
       >
-        삭제
+        {todo.completed ? <CheckCircleIcon /> : <CircleIcon />}
+        <span className="visually-hidden">
+          {todo.completed ? "완료" : "미완료"}
+        </span>
       </button>
+
+      {isEditing ? (
+        <button
+          className="save-button icon-button"
+          type="button"
+          onClick={() => onEditSubmit(todo.id)}
+          aria-label={`${todo.title} 저장`}
+          title="저장"
+        >
+          <SaveIcon />
+        </button>
+      ) : (
+        <button
+          className="edit-button icon-button"
+          type="button"
+          onClick={() => onEditStart(todo)}
+          aria-label={`${todo.title} 수정`}
+          title="수정"
+        >
+          <EditIcon />
+        </button>
+      )}
+
+      {isEditing ? (
+        <button
+          className="cancel-button icon-button"
+          type="button"
+          onClick={onEditCancel}
+          aria-label={`${todo.title} 수정 취소`}
+          title="취소"
+        >
+          <UndoIcon />
+        </button>
+      ) : (
+        <button
+          className="delete-button icon-button"
+          type="button"
+          onClick={() => onDelete(todo.id)}
+          aria-label={`${todo.title} 삭제`}
+          title="삭제"
+        >
+          <TrashIcon />
+        </button>
+      )}
     </li>
   );
 }

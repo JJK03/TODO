@@ -152,6 +152,13 @@ function App() {
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
 
+    if (sortOption === "updatedLatest") {
+      const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+
+      return bTime - aTime;
+    }
+
     if (sortOption === "title") {
       return a.title.localeCompare(b.title);
     }
@@ -191,7 +198,9 @@ function App() {
           <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
         </div>
 
-        {isLoading && <p className="state-message">불러오는 중...</p>}
+        {isLoading && todos.length === 0 && (
+          <p className="state-message">불러오는 중...</p>
+        )}
 
         {!isLoading && errorMessage && (
           <p className="state-message error-message">{errorMessage}</p>
@@ -201,7 +210,7 @@ function App() {
           <p className="state-message empty-message">표시할 Todo가 없습니다.</p>
         )}
 
-        {!isLoading && !errorMessage && todos.length > 0 && (
+        {!errorMessage && todos.length > 0 && (
           <TodoList
             todos={sortedTodos}
             editingTodoId={editingTodoId}
