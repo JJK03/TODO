@@ -13,7 +13,10 @@ import TodoForm from "./components/TodoForm";
 import TodoHeader from "./components/TodoHeader";
 import TodoList from "./components/TodoList";
 import TodoSearch from "./components/TodoSearch";
+import TodoSort from "./components/TodoSort";
+
 import type { Todo } from "./types/todo";
+import type { SortOption } from "./types/sort";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -32,6 +35,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("latest");
 
   const fetchTodos = useCallback(async () => {
     setIsLoading(true);
@@ -139,28 +143,53 @@ function App() {
     }
   };
 
+  const sortedTodos = [...todos].sort((a, b) => {
+    if (sortOption === "latest") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+
+    if (sortOption === "oldest") {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+
+    if (sortOption === "title") {
+      return a.title.localeCompare(b.title);
+    }
+
+    if (sortOption === "completed") {
+      return Number(a.completed) - Number(b.completed);
+    }
+
+    return 0;
+  });
+
   return (
     <main className="app-shell">
       <section className="todo-panel" aria-labelledby="todo-heading">
-        <TodoHeader todoCount={todos.length} />
+        <TodoHeader todoCount={todos.length} onReset={handleSearchReset} />
 
-        <TodoSearch
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          onSubmit={handleSearchSubmit}
-          onReset={handleSearchReset}
-        />
+        <div className="input-row">
+          <TodoSearch
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+            onSubmit={handleSearchSubmit}
+          />
 
-        <TodoForm
-          title={title}
-          onTitleChange={setTitle}
-          onSubmit={handleSubmit}
-        />
+          <TodoForm
+            title={title}
+            onTitleChange={setTitle}
+            onSubmit={handleSubmit}
+          />
+        </div>
 
-        <TodoFilter
-          completedFilter={completedFilter}
-          onFilterChange={setCompletedFilter}
-        />
+        <div className="toolbar-row">
+          <TodoFilter
+            completedFilter={completedFilter}
+            onFilterChange={setCompletedFilter}
+          />
+
+          <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
+        </div>
 
         {isLoading && <p className="state-message">불러오는 중...</p>}
 
@@ -174,7 +203,7 @@ function App() {
 
         {!isLoading && !errorMessage && todos.length > 0 && (
           <TodoList
-            todos={todos}
+            todos={sortedTodos}
             editingTodoId={editingTodoId}
             editingTitle={editingTitle}
             onEditingTitleChange={setEditingTitle}

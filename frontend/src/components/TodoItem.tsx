@@ -35,19 +35,47 @@ export default function TodoItem({
       </button>
 
       {isEditing ? (
-        <>
+        <div className="todo-edit">
           <input
+            className="todo-edit-input"
             value={editingTitle}
             onChange={(e) => onEditingTitleChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onEditSubmit(todo.id);
+              }
+
+              if (e.key === "Escape") {
+                onEditCancel();
+              }
+            }}
           />
-          <button onClick={() => onEditSubmit(todo.id)}>저장</button>
-          <button onClick={onEditCancel}>취소</button>
-        </>
+          <button
+            className="save-button"
+            type="button"
+            onClick={() => onEditSubmit(todo.id)}
+          >
+            저장
+          </button>
+          <button
+            className="cancel-button"
+            type="button"
+            onClick={onEditCancel}
+          >
+            취소
+          </button>
+        </div>
       ) : (
-        <>
-          <span>{todo.title}</span>
-          <button onClick={() => onEditStart(todo)}>수정</button>
-        </>
+        <div className="todo-content">
+          <span className="todo-title">{todo.title}</span>
+          <button
+            className="edit-button"
+            type="button"
+            onClick={() => onEditStart(todo)}
+          >
+            수정
+          </button>
+        </div>
       )}
 
       <span className="todo-status">{todo.completed ? "완료" : "미완료"}</span>

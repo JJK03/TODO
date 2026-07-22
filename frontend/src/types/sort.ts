@@ -1,0 +1,1 @@
+export type SortOption = "latest" | "oldest" | "title" | "completed";
