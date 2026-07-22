@@ -37,6 +37,10 @@ function App() {
   const [editingTitle, setEditingTitle] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("latest");
 
+  const showErrorMessage = useCallback((message: string) => {
+    setErrorMessage(message);
+  }, []);
+
   const fetchTodos = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
@@ -61,6 +65,18 @@ function App() {
     void loadTodos();
   }, [fetchTodos]);
 
+  useEffect(() => {
+    if (!errorMessage) return;
+
+    const timerId = window.setTimeout(() => {
+      setErrorMessage("");
+    }, 3200);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [errorMessage]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -72,6 +88,7 @@ function App() {
       await fetchTodos();
     } catch (error: unknown) {
       console.error(error);
+      showErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -92,6 +109,7 @@ function App() {
     } catch (error: unknown) {
       console.error(error);
       setTodos([]);
+      showErrorMessage(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +126,7 @@ function App() {
       await fetchTodos();
     } catch (error: unknown) {
       console.error(error);
+      showErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -117,6 +136,7 @@ function App() {
       await fetchTodos();
     } catch (error: unknown) {
       console.error(error);
+      showErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -140,6 +160,7 @@ function App() {
       await fetchTodos();
     } catch (error: unknown) {
       console.error(error);
+      showErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -172,6 +193,12 @@ function App() {
 
   return (
     <main className="app-shell">
+      {errorMessage && (
+        <div className="toast error-toast" role="alert" aria-live="assertive">
+          {errorMessage}
+        </div>
+      )}
+
       <section className="todo-panel" aria-labelledby="todo-heading">
         <TodoHeader todoCount={todos.length} onReset={handleSearchReset} />
 
@@ -202,15 +229,11 @@ function App() {
           <p className="state-message">불러오는 중...</p>
         )}
 
-        {!isLoading && errorMessage && (
-          <p className="state-message error-message">{errorMessage}</p>
-        )}
-
-        {!isLoading && !errorMessage && todos.length === 0 && (
+        {!isLoading && todos.length === 0 && (
           <p className="state-message empty-message">표시할 Todo가 없습니다.</p>
         )}
 
-        {!errorMessage && todos.length > 0 && (
+        {todos.length > 0 && (
           <TodoList
             todos={sortedTodos}
             editingTodoId={editingTodoId}

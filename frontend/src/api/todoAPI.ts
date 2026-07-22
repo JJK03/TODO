@@ -2,6 +2,14 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const handleErrorResponse = async (response: Response) => {
+  const errorData = await response.json();
+
+  throw new Error(
+    errorData.message ?? `요청 실패: ${response.status}`
+  );
+}
+
 export const getTodos = async (completedFilter = "all"): Promise<Todo[]> => {
   const url =
     completedFilter === "all"
@@ -11,7 +19,7 @@ export const getTodos = async (completedFilter = "all"): Promise<Todo[]> => {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Todo 목록 조회 실패: ${response.status}`);
+    await handleErrorResponse(response);
   }
 
   return response.json();
@@ -23,7 +31,7 @@ export const searchTodos = async (keyword: string): Promise<Todo[]> => {
   );
 
   if (!response.ok) {
-    throw new Error(`Todo 검색 실패: ${response.status}`);
+    await handleErrorResponse(response);
   }
 
   return response.json();
@@ -39,7 +47,7 @@ export const createTodo = async (title: string): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Todo 생성 실패: ${response.status}`);
+    await handleErrorResponse(response);
   }
 };
 
@@ -49,7 +57,7 @@ export const toggleTodo = async (id: number): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Todo 토글 실패: ${response.status}`);
+    await handleErrorResponse(response);
   }
 };
 
@@ -63,7 +71,7 @@ export const updateTodo = async (id: number, title: string) => {
   });
 
   if (!response.ok) {
-    throw new Error("Todo 수정에 실패했습니다.");
+    await handleErrorResponse(response);
   }
 
   return response.json();
@@ -75,6 +83,6 @@ export const deleteTodo = async (id: number): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Todo 삭제 실패: ${response.status}`);
+    await handleErrorResponse(response);
   }
 };

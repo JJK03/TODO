@@ -6,6 +6,46 @@
   align-items: flex-start;
 }
 
+.toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 20;
+  width: min(420px, calc(100% - 32px));
+  padding: 13px 16px;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(9, 28, 26, 0.26);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  transform: translateX(-50%);
+  animation: toast-lifecycle 3200ms ease-in-out both;
+}
+
+.error-toast {
+  border: 1px solid #e9a19a;
+  color: #7e2525;
+  background: #ffe2df;
+}
+
+@keyframes toast-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -14px);
+  }
+
+  8%,
+  88% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -14px);
+  }
+}
+
 .todo-panel {
   width: min(820px, 100%);
   padding: 30px;

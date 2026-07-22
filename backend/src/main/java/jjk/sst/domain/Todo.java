@@ -41,9 +41,8 @@ public class Todo {
         this.completed = completed;
     }
 
-    public void update(String title, boolean completed) {
+    public void updateTitle(String title) {
         this.title = title;
-        this.completed = completed;
         this.updatedAt = LocalDateTime.now();
     }
 

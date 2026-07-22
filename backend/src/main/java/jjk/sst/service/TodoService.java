@@ -40,9 +40,9 @@ public class TodoService {
     }
 
     @Transactional
-    public Todo update(Long id, String title, boolean completed) {
+    public Todo update(Long id, String title) {
         Todo todo = findById(id);
-        todo.update(title, completed);
+        todo.updateTitle(title);
         return todo;
     }
 

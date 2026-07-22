@@ -37,7 +37,8 @@ public class TodoController {
     }
 
     @GetMapping
-    public List<TodoResponse> findAll(@RequestParam(name = "completed", required = false) Boolean completed,
+    public List<TodoResponse> findAll(
+            @RequestParam(name = "completed", required = false) Boolean completed,
             @RequestParam(name = "sort", defaultValue = "desc") String sort) {
 
         List<Todo> todos;
@@ -54,7 +55,8 @@ public class TodoController {
     }
 
     @GetMapping("/search")
-    public List<TodoResponse> search(@RequestParam(name = "keyword") String keyword,
+    public List<TodoResponse> search(
+            @RequestParam(name = "keyword") String keyword,
             @RequestParam(name = "sort", defaultValue = "desc") String sort) {
         return todoService.searchByTitle(keyword, sort).stream().map(TodoResponse::new).toList();
     }
@@ -69,12 +71,13 @@ public class TodoController {
     public TodoResponse update(
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody TodoUpdateRequest request) {
-        Todo todo = todoService.update(id, request.getTitle(), request.isCompleted());
+        Todo todo = todoService.update(id, request.getTitle());
         return new TodoResponse(todo);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable(name = "id") Long id) {
+    public void delete(
+            @PathVariable(name = "id") Long id) {
         todoService.delete(id);
     }
 
