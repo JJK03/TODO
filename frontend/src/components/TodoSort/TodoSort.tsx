@@ -1,4 +1,5 @@
-import type { SortOption } from "../types/sort";
+import type { SortOption } from "../../types/sort";
+import "../TodoToolbar/TodoToolbar.css";
 
 type TodoSortProps = {
   sortOption: SortOption;

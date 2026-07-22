@@ -1,0 +1,51 @@
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.toolbar label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.toolbar select {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 132px;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid #d8c8b9;
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.toolbar select:focus {
+  border-color: var(--primary);
+  background: #fffdf8;
+  box-shadow: 0 0 0 3px rgba(214, 95, 70, 0.17);
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+
+  .toolbar select {
+    width: auto;
+    max-width: 120px;
+  }
+}

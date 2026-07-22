@@ -1,4 +1,5 @@
-import type { Todo } from "../types/todo";
+import type { Todo } from "../../types/todo";
+import "./TodoItem.css";
 
 type TodoItemProps = {
   todo: Todo;

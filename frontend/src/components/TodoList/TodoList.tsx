@@ -1,5 +1,6 @@
-import type { Todo } from "../types/todo";
-import TodoItem from "./TodoItem";
+import type { Todo } from "../../types/todo";
+import TodoItem from "../TodoItem/TodoItem";
+import "./TodoList.css";
 
 type TodoListProps = {
   todos: Todo[];

@@ -1,3 +1,5 @@
+import "./TodoHeader.css";
+
 type TodoHeaderProps = {
   todoCount: number;
   onReset: () => void;

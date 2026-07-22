@@ -1,3 +1,5 @@
+import "./TodoForm.css";
+
 type TodoFormProps = {
   title: string;
   onTitleChange: (title: string) => void;

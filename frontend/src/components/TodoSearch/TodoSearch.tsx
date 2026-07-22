@@ -1,3 +1,5 @@
+import "./TodoSearch.css";
+
 type TodoSearchProps = {
   keyword: string;
   onKeywordChange: (keyword: string) => void;

@@ -8,15 +8,18 @@ import {
   toggleTodo,
   updateTodo,
 } from "./api/todoAPI";
-import TodoFilter from "./components/TodoFilter";
-import TodoForm from "./components/TodoForm";
-import TodoHeader from "./components/TodoHeader";
-import TodoList from "./components/TodoList";
-import TodoSearch from "./components/TodoSearch";
-import TodoSort from "./components/TodoSort";
+import TodoFilter from "./components/TodoFilter/TodoFilter";
+import TodoForm from "./components/TodoForm/TodoForm";
+import TodoHeader from "./components/TodoHeader/TodoHeader";
+import TodoList from "./components/TodoList/TodoList";
+import TodoSearch from "./components/TodoSearch/TodoSearch";
+import TodoSort from "./components/TodoSort/TodoSort";
+import ThreePlayground from "./features/playground/ThreePlayground";
 
 import type { Todo } from "./types/todo";
 import type { SortOption } from "./types/sort";
+
+type ActiveTab = "todo" | "three";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -36,6 +39,7 @@ function App() {
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("latest");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("todo");
 
   const showErrorMessage = useCallback((message: string) => {
     setErrorMessage(message);
@@ -199,52 +203,85 @@ function App() {
         </div>
       )}
 
-      <section className="todo-panel" aria-labelledby="todo-heading">
-        <TodoHeader todoCount={todos.length} onReset={handleSearchReset} />
-
-        <div className="input-row">
-          <TodoSearch
-            keyword={keyword}
-            onKeywordChange={setKeyword}
-            onSubmit={handleSearchSubmit}
-          />
-
-          <TodoForm
-            title={title}
-            onTitleChange={setTitle}
-            onSubmit={handleSubmit}
-          />
+      <section className="app-panel" aria-labelledby="app-heading">
+        <div className="app-tabs" role="tablist" aria-label="앱 화면 선택">
+          <button
+            className={activeTab === "todo" ? "app-tab active" : "app-tab"}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "todo"}
+            onClick={() => setActiveTab("todo")}
+          >
+            Todo
+          </button>
+          <button
+            className={activeTab === "three" ? "app-tab active" : "app-tab"}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "three"}
+            onClick={() => setActiveTab("three")}
+          >
+            Three.js
+          </button>
         </div>
 
-        <div className="toolbar-row">
-          <TodoFilter
-            completedFilter={completedFilter}
-            onFilterChange={setCompletedFilter}
-          />
+        {activeTab === "todo" && (
+          <div role="tabpanel" aria-labelledby="todo-heading">
+            <TodoHeader todoCount={todos.length} onReset={handleSearchReset} />
 
-          <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
-        </div>
+            <div className="input-row">
+              <TodoSearch
+                keyword={keyword}
+                onKeywordChange={setKeyword}
+                onSubmit={handleSearchSubmit}
+              />
 
-        {isLoading && todos.length === 0 && (
-          <p className="state-message">불러오는 중...</p>
+              <TodoForm
+                title={title}
+                onTitleChange={setTitle}
+                onSubmit={handleSubmit}
+              />
+            </div>
+
+            <div className="toolbar-row">
+              <TodoFilter
+                completedFilter={completedFilter}
+                onFilterChange={setCompletedFilter}
+              />
+
+              <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
+            </div>
+
+            {isLoading && todos.length === 0 && (
+              <p className="state-message">불러오는 중...</p>
+            )}
+
+            {!isLoading && todos.length === 0 && (
+              <p className="state-message empty-message">
+                표시할 Todo가 없습니다.
+              </p>
+            )}
+
+            {todos.length > 0 && (
+              <TodoList
+                todos={sortedTodos}
+                editingTodoId={editingTodoId}
+                editingTitle={editingTitle}
+                onEditingTitleChange={setEditingTitle}
+                onEditStart={handleEditStart}
+                onEditCancel={handleEditCancel}
+                onEditSubmit={handleEditSubmit}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+              />
+            )}
+          </div>
         )}
 
-        {!isLoading && todos.length === 0 && (
-          <p className="state-message empty-message">표시할 Todo가 없습니다.</p>
-        )}
-
-        {todos.length > 0 && (
-          <TodoList
-            todos={sortedTodos}
-            editingTodoId={editingTodoId}
-            editingTitle={editingTitle}
-            onEditingTitleChange={setEditingTitle}
-            onEditStart={handleEditStart}
-            onEditCancel={handleEditCancel}
-            onEditSubmit={handleEditSubmit}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-          />
+        {activeTab === "three" && (
+          <div role="tabpanel" className="three-tab-panel">
+            <ThreePlayground />
+          </div>
         )}
       </section>
     </main>

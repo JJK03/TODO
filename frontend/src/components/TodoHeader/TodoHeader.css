@@ -1,0 +1,75 @@
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #ded1c2;
+}
+
+.todo-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.todo-count {
+  min-width: 58px;
+  padding: 7px 12px;
+  border: 1px solid #f3b8a9;
+  border-radius: 999px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.reset-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d8c8b9;
+  border-radius: 8px;
+  color: #42514d;
+  background: #fff8ed;
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.reset-button:hover {
+  border-color: #c8b39f;
+  background: #f1e8db;
+}
+
+.reset-button:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .todo-header {
+    margin-bottom: 20px;
+  }
+
+  .todo-header-title {
+    gap: 10px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+}

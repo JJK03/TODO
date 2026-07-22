@@ -1,0 +1,57 @@
+.todo-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.todo-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d8c8b9;
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.todo-search input:focus {
+  border-color: var(--primary);
+  background: #fffdf8;
+  box-shadow: 0 0 0 3px rgba(214, 95, 70, 0.17);
+}
+
+.todo-search button {
+  min-height: 36px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.todo-search button:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.todo-search button:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .todo-search {
+    grid-template-columns: 1fr;
+  }
+}

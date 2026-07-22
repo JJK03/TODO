@@ -1,3 +1,5 @@
+import "../TodoToolbar/TodoToolbar.css";
+
 type TodoFilterProps = {
   completedFilter: string;
   onFilterChange: (filter: string) => void;
