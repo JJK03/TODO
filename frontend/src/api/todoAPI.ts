@@ -1,6 +1,6 @@
 ﻿import type { Todo } from "../types/todo";
 
-const API_BASE_URL = "http://localhost:9170";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const getTodos = async (completedFilter = "all"): Promise<Todo[]> => {
   const url =
