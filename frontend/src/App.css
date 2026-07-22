@@ -1,0 +1,246 @@
+﻿.app-shell {
+  min-height: 100vh;
+  padding: 48px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.todo-panel {
+  width: min(760px, 100%);
+  padding: 28px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.todo-count {
+  min-width: 54px;
+  padding: 7px 10px;
+  border: 1px solid #c8d7ee;
+  border-radius: 999px;
+  color: #1e3a8a;
+  background: #eff6ff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.todo-form {
+  display: grid;
+  grid-template-columns: 1fr 88px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.todo-form input,
+.toolbar select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #cfd6df;
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.todo-form input {
+  padding: 0 14px;
+}
+
+.todo-form input:focus,
+.toolbar select:focus {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.todo-form button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--primary);
+  font-weight: 800;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.todo-form button:hover {
+  background: var(--primary-hover);
+}
+
+.todo-form button:active,
+.status-button:active,
+.delete-button:active {
+  transform: translateY(1px);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.toolbar select {
+  max-width: 132px;
+  padding: 0 11px;
+}
+
+.todo-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 68px 62px;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.todo-item.completed {
+  background: #fbfefc;
+}
+
+.status-button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cfd6df;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #f59e0b;
+}
+
+.todo-item.completed .status-button {
+  border-color: #9bd8ba;
+  background: var(--success-bg);
+}
+
+.todo-item.completed .status-dot {
+  background: var(--success);
+}
+
+.todo-title {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.todo-item.completed .todo-title {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.todo-status {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #92400e;
+  background: #fffbeb;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todo-item.completed .todo-status {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.delete-button {
+  min-height: 34px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: var(--danger);
+  background: var(--danger-bg);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.delete-button:hover {
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 20px 12px;
+  }
+
+  .todo-panel {
+    padding: 20px;
+  }
+
+  .todo-header {
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .todo-form {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    justify-content: space-between;
+  }
+
+  .todo-item {
+    grid-template-columns: 34px minmax(0, 1fr) 62px;
+  }
+
+  .todo-status {
+    display: none;
+  }
+}
