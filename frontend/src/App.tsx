@@ -33,7 +33,11 @@ export default function App() {
           </button>
         </div>
 
-        {activeTab === "todo" && <TodoPage />}
+        {activeTab === "todo" && (
+          <div role="tabpanel" className="todo-tab-panel">
+            <TodoPage />
+          </div>
+        )}
 
         {activeTab === "three" && (
           <div role="tabpanel" className="three-tab-panel">

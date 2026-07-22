@@ -9,10 +9,9 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 12px 24px;
   margin: 4px 0 18px;
-  overflow-x: auto;
 }
 
 .state-message {
@@ -36,10 +35,7 @@
   }
 
   .toolbar-row {
-    flex-direction: row;
     justify-content: flex-start;
-    align-items: center;
-    flex-wrap: nowrap;
     gap: 10px;
   }
 }
