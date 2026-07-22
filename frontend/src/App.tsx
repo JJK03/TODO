@@ -6,6 +6,7 @@ import {
   getTodos,
   searchTodos,
   toggleTodo,
+  updateTodo,
 } from "./api/todoAPI";
 import TodoFilter from "./components/TodoFilter";
 import TodoForm from "./components/TodoForm";
@@ -29,6 +30,8 @@ function App() {
   const [keyword, setKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const fetchTodos = useCallback(async () => {
     setIsLoading(true);
@@ -47,7 +50,11 @@ function App() {
   }, [completedFilter]);
 
   useEffect(() => {
-    fetchTodos();
+    const loadTodos = async () => {
+      await fetchTodos();
+    };
+
+    void loadTodos();
   }, [fetchTodos]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -71,7 +78,7 @@ function App() {
       await fetchTodos();
       return;
     }
-    
+
     setIsLoading(true);
     setErrorMessage("");
 
@@ -103,6 +110,29 @@ function App() {
   const handleDelete = async (id: number) => {
     try {
       await deleteTodo(id);
+      await fetchTodos();
+    } catch (error: unknown) {
+      console.error(error);
+    }
+  };
+
+  const handleEditStart = (todo: Todo) => {
+    setEditingTodoId(todo.id);
+    setEditingTitle(todo.title);
+  };
+
+  const handleEditCancel = () => {
+    setEditingTodoId(null);
+    setEditingTitle("");
+  };
+
+  const handleEditSubmit = async (id: number) => {
+    if (editingTitle.trim() === "") return;
+
+    try {
+      await updateTodo(id, editingTitle.trim());
+      setEditingTodoId(null);
+      setEditingTitle("");
       await fetchTodos();
     } catch (error: unknown) {
       console.error(error);
@@ -145,6 +175,12 @@ function App() {
         {!isLoading && !errorMessage && todos.length > 0 && (
           <TodoList
             todos={todos}
+            editingTodoId={editingTodoId}
+            editingTitle={editingTitle}
+            onEditingTitleChange={setEditingTitle}
+            onEditStart={handleEditStart}
+            onEditCancel={handleEditCancel}
+            onEditSubmit={handleEditSubmit}
             onToggle={handleToggle}
             onDelete={handleDelete}
           />

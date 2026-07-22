@@ -2,11 +2,27 @@ import type { Todo } from "../types/todo";
 
 type TodoItemProps = {
   todo: Todo;
+  isEditing: boolean;
+  editingTitle: string;
+  onEditingTitleChange: (title: string) => void;
+  onEditStart: (todo: Todo) => void;
+  onEditCancel: () => void;
+  onEditSubmit: (id: number) => void;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
 };
 
-export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
+export default function TodoItem({
+  todo,
+  isEditing,
+  editingTitle,
+  onEditingTitleChange,
+  onEditStart,
+  onEditCancel,
+  onEditSubmit,
+  onToggle,
+  onDelete,
+}: TodoItemProps) {
   return (
     <li className={todo.completed ? "todo-item completed" : "todo-item"}>
       <button
@@ -18,7 +34,21 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         <span className="status-dot" />
       </button>
 
-      <span className="todo-title">{todo.title}</span>
+      {isEditing ? (
+        <>
+          <input
+            value={editingTitle}
+            onChange={(e) => onEditingTitleChange(e.target.value)}
+          />
+          <button onClick={() => onEditSubmit(todo.id)}>저장</button>
+          <button onClick={onEditCancel}>취소</button>
+        </>
+      ) : (
+        <>
+          <span>{todo.title}</span>
+          <button onClick={() => onEditStart(todo)}>수정</button>
+        </>
+      )}
 
       <span className="todo-status">{todo.completed ? "완료" : "미완료"}</span>
 

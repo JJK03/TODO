@@ -53,6 +53,22 @@ export const toggleTodo = async (id: number): Promise<void> => {
   }
 };
 
+export const updateTodo = async (id: number, title: string) => {
+  const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Todo 수정에 실패했습니다.");
+  }
+
+  return response.json();
+};
+
 export const deleteTodo = async (id: number): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
     method: "DELETE",
