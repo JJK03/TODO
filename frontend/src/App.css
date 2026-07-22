@@ -98,38 +98,6 @@
   display: grid;
 }
 
-.input-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.toolbar-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: nowrap;
-  gap: 24px;
-  margin: 4px 0 18px;
-  overflow-x: auto;
-}
-
-.state-message {
-  margin: 18px 0 0;
-  padding: 18px;
-  border: 1px solid #ded1c2;
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--muted);
-  font-weight: 800;
-  text-align: center;
-}
-
-.empty-message {
-  background: #fff8ed;
-}
-
 @media (max-width: 640px) {
   .app-shell {
     padding: 22px 12px;
@@ -141,17 +109,5 @@
 
   .app-tabs {
     margin-bottom: 20px;
-  }
-
-  .input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .toolbar-row {
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 10px;
   }
 }
