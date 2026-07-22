@@ -23,6 +23,27 @@
   margin-bottom: 24px;
 }
 
+.state-message {
+  margin: 18px 0 0;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.error-message {
+  border-color: #fecaca;
+  background: #fff1f0;
+  color: var(--danger);
+}
+
+.empty-message {
+  background: #fbfcfe;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   color: var(--muted);
@@ -68,7 +89,10 @@ h1 {
   background: var(--input-bg);
   color: var(--text);
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .todo-form input {
@@ -89,7 +113,9 @@ h1 {
   color: #ffffff;
   background: var(--primary);
   font-weight: 800;
-  transition: background 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .todo-form button:hover {

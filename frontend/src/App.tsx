@@ -14,38 +14,41 @@ import TodoList from "./components/TodoList";
 import TodoSearch from "./components/TodoSearch";
 import type { Todo } from "./types/todo";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "알 수 없는 오류가 발생했습니다.";
+};
+
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState("");
   const [completedFilter, setCompletedFilter] = useState("all");
   const [keyword, setKeyword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchTodos = useCallback(async () => {
-    const data = await getTodos(completedFilter);
-    setTodos(data);
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const data = await getTodos(completedFilter);
+      setTodos(data);
+    } catch (error: unknown) {
+      console.error(error);
+      setTodos([]);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   }, [completedFilter]);
 
   useEffect(() => {
-    let ignore = false;
-
-    getTodos(completedFilter)
-      .then((data) => {
-        if (!ignore) {
-          setTodos(data);
-        }
-      })
-      .catch((error: unknown) => {
-        console.error(error);
-
-        if (!ignore) {
-          setTodos([]);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [completedFilter]);
+    fetchTodos();
+  }, [fetchTodos]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,6 +71,9 @@ function App() {
       await fetchTodos();
       return;
     }
+    
+    setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const data = await searchTodos(keyword.trim());
@@ -75,6 +81,8 @@ function App() {
     } catch (error: unknown) {
       console.error(error);
       setTodos([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,11 +132,23 @@ function App() {
           onFilterChange={setCompletedFilter}
         />
 
-        <TodoList
-          todos={todos}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-        />
+        {isLoading && <p className="state-message">불러오는 중...</p>}
+
+        {!isLoading && errorMessage && (
+          <p className="state-message error-message">{errorMessage}</p>
+        )}
+
+        {!isLoading && !errorMessage && todos.length === 0 && (
+          <p className="state-message empty-message">표시할 Todo가 없습니다.</p>
+        )}
+
+        {!isLoading && !errorMessage && todos.length > 0 && (
+          <TodoList
+            todos={todos}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+          />
+        )}
       </section>
     </main>
   );
