@@ -18,9 +18,7 @@ export default function TodoSort({ sortOption, onSortChange }: TodoSortProps) {
       >
         <option value="latest">최신순</option>
         <option value="oldest">오래된순</option>
-        <option value="updatedLatest">최근 수정순</option>
         <option value="title">제목순</option>
-        <option value="completed">미완료 먼저</option>
       </select>
     </div>
   );

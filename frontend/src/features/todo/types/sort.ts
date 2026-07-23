@@ -1,1 +1,1 @@
-export type SortOption = "latest" | "oldest" | "updatedLatest" | "title" | "completed";
+export type SortOption = "latest" | "oldest" | "title";

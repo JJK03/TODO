@@ -94,11 +94,6 @@ export default function TodoItem({
             <span className="todo-date">
               작성: {new Date(todo.createdAt).toLocaleString()}
             </span>
-            {todo.updatedAt && (
-              <span className="todo-date">
-                수정: {new Date(todo.updatedAt).toLocaleString()}
-              </span>
-            )}
           </div>
         </div>
       )}

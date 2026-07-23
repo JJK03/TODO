@@ -7,6 +7,7 @@ type ActiveTab = "todo" | "three";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("todo");
+  const [todoResetToken, setTodoResetToken] = useState(0);
 
   return (
     <main className="app-shell">
@@ -31,11 +32,28 @@ export default function App() {
           >
             Three.js
           </button>
+
+          {activeTab === "todo" && (
+            <button
+              className="app-refresh-button"
+              type="button"
+              onClick={() => setTodoResetToken((token) => token + 1)}
+              aria-label="Todo 새로고침"
+              title="Todo 새로고침"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12a9 9 0 0 1-15.4 6.4L3 16" />
+                <path d="M3 21v-5h5" />
+                <path d="M3 12a9 9 0 0 1 15.4-6.4L21 8" />
+                <path d="M21 3v5h-5" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {activeTab === "todo" && (
           <div role="tabpanel" className="todo-tab-panel">
-            <TodoPage />
+            <TodoPage resetToken={todoResetToken} />
           </div>
         )}
 

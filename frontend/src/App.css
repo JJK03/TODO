@@ -58,6 +58,7 @@
 .app-tabs {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-bottom: 24px;
   padding-bottom: 14px;
@@ -94,6 +95,44 @@
 
 .app-tab:active {
   transform: translateY(1px);
+}
+
+.app-refresh-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid #d8c8b9;
+  border-radius: 8px;
+  color: #42514d;
+  background: #fff8ed;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.app-refresh-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fffdf8;
+}
+
+.app-refresh-button:active {
+  transform: translateY(1px);
+}
+
+.app-refresh-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .todo-tab-panel {

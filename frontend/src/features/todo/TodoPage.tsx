@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTodo,
   deleteTodo,
@@ -8,16 +8,18 @@ import {
   updateTodo,
 } from "./api/todoAPI";
 
-import TodoFilter from "./components/TodoFilter/TodoFilter";
 import TodoForm from "./components/TodoForm/TodoForm";
 import TodoHeader from "./components/TodoHeader/TodoHeader";
 import TodoList from "./components/TodoList/TodoList";
-import TodoSearch from "./components/TodoSearch/TodoSearch";
 import TodoSort from "./components/TodoSort/TodoSort";
 
 import type { Todo } from "./types/todo";
 import type { SortOption } from "./types/sort";
 import "./TodoPage.css";
+
+type TodoPageProps = {
+  resetToken: number;
+};
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -27,16 +29,17 @@ const getErrorMessage = (error: unknown) => {
   return "알 수 없는 오류가 발생했습니다.";
 };
 
-export default function TodoPage() {
+export default function TodoPage({ resetToken }: TodoPageProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState("");
-  const [completedFilter, setCompletedFilter] = useState("all");
   const [keyword, setKeyword] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("latest");
+  const didMountRef = useRef(false);
 
   const showErrorMessage = useCallback((message: string) => {
     setErrorMessage(message);
@@ -47,7 +50,7 @@ export default function TodoPage() {
     setErrorMessage("");
 
     try {
-      const data = await getTodos(completedFilter);
+      const data = await getTodos();
       setTodos(data);
     } catch (error: unknown) {
       console.error(error);
@@ -56,7 +59,7 @@ export default function TodoPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [completedFilter]);
+  }, []);
 
   useEffect(() => {
     const loadTodos = async () => {
@@ -106,7 +109,26 @@ export default function TodoPage() {
 
   const handleSearchReset = async () => {
     setKeyword("");
+    setIsSearchOpen(false);
     await fetchTodos();
+  };
+
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    void handleSearchReset();
+  }, [resetToken]);
+
+  const handleSearchToggle = async () => {
+    if (isSearchOpen && keyword.trim() !== "") {
+      setKeyword("");
+      await fetchTodos();
+    }
+
+    setIsSearchOpen((current) => !current);
   };
 
   const handleToggle = async (id: number) => {
@@ -162,23 +184,29 @@ export default function TodoPage() {
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
 
-    if (sortOption === "updatedLatest") {
-      const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-
-      return bTime - aTime;
-    }
-
     if (sortOption === "title") {
       return a.title.localeCompare(b.title);
     }
 
-    if (sortOption === "completed") {
-      return Number(a.completed) - Number(b.completed);
-    }
-
     return 0;
   });
+
+  const pendingTodos = sortedTodos.filter((todo) => !todo.completed);
+  const completedTodos = sortedTodos.filter((todo) => todo.completed);
+
+  const renderTodoList = (items: Todo[]) => (
+    <TodoList
+      todos={items}
+      editingTodoId={editingTodoId}
+      editingTitle={editingTitle}
+      onEditingTitleChange={setEditingTitle}
+      onEditStart={handleEditStart}
+      onEditCancel={handleEditCancel}
+      onEditSubmit={handleEditSubmit}
+      onToggle={handleToggle}
+      onDelete={handleDelete}
+    />
+  );
 
   return (
     <>
@@ -188,29 +216,25 @@ export default function TodoPage() {
         </div>
       )}
 
-      <TodoHeader todoCount={todos.length} onReset={handleSearchReset} />
+      <TodoHeader
+        todoCount={todos.length}
+        keyword={keyword}
+        isSearchOpen={isSearchOpen}
+        onKeywordChange={setKeyword}
+        onSearchSubmit={handleSearchSubmit}
+        onSearchToggle={handleSearchToggle}
+      />
 
       <div className="input-row">
-        <TodoSearch
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          onSubmit={handleSearchSubmit}
-        />
-
         <TodoForm
           title={title}
           onTitleChange={setTitle}
           onSubmit={handleSubmit}
         />
-      </div>
 
-      <div className="toolbar-row">
-        <TodoFilter
-          completedFilter={completedFilter}
-          onFilterChange={setCompletedFilter}
-        />
-
-        <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
+        <div className="todo-controls">
+          <TodoSort sortOption={sortOption} onSortChange={setSortOption} />
+        </div>
       </div>
 
       {isLoading && todos.length === 0 && (
@@ -222,17 +246,31 @@ export default function TodoPage() {
       )}
 
       {todos.length > 0 && (
-        <TodoList
-          todos={sortedTodos}
-          editingTodoId={editingTodoId}
-          editingTitle={editingTitle}
-          onEditingTitleChange={setEditingTitle}
-          onEditStart={handleEditStart}
-          onEditCancel={handleEditCancel}
-          onEditSubmit={handleEditSubmit}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-        />
+        <div className="todo-board">
+          <section className="todo-column" aria-labelledby="pending-heading">
+            <div className="todo-column-header">
+              <h2 id="pending-heading">미완료</h2>
+              <span>{pendingTodos.length}개</span>
+            </div>
+            {pendingTodos.length > 0 ? (
+              renderTodoList(pendingTodos)
+            ) : (
+              <p className="column-empty-message">미완료 Todo가 없습니다.</p>
+            )}
+          </section>
+
+          <section className="todo-column" aria-labelledby="completed-heading">
+            <div className="todo-column-header">
+              <h2 id="completed-heading">완료</h2>
+              <span>{completedTodos.length}개</span>
+            </div>
+            {completedTodos.length > 0 ? (
+              renderTodoList(completedTodos)
+            ) : (
+              <p className="column-empty-message">완료된 Todo가 없습니다.</p>
+            )}
+          </section>
+        </div>
       )}
     </>
   );
