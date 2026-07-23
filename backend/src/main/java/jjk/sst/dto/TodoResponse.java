@@ -3,6 +3,7 @@ package jjk.sst.dto;
 import java.time.LocalDateTime;
 
 import jjk.sst.domain.Todo;
+import jjk.sst.domain.TodoPriority;
 import lombok.Getter;
 
 @Getter
@@ -13,6 +14,7 @@ public class TodoResponse {
     private boolean completed;
     private LocalDateTime dueDate;
     private boolean dueTimeSet;
+    private TodoPriority priority;
 
     public TodoResponse(Todo todo) {
         this.id = todo.getId();
@@ -20,5 +22,6 @@ public class TodoResponse {
         this.completed = todo.isCompleted();
         this.dueDate = todo.getDueDate();
         this.dueTimeSet = todo.isDueTimeSet();
+        this.priority = todo.getPriority();
     }
 }

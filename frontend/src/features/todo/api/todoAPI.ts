@@ -1,4 +1,4 @@
-import type { Todo } from "../types/todo";
+import type { Todo, TodoPriority } from "../types/todo";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,6 +11,25 @@ export type TodoPageResponse = {
   first: boolean;
   last: boolean;
 };
+
+export const updateTodoPriority = async (
+  id: number,
+  priority: TodoPriority,
+): Promise<Todo> => {
+  const response = await fetch(`${API_BASE_URL}/todos/${id}/priority`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ priority }),
+  });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
+  return response.json();
+}
 
 type GetTodosParams = {
   completed?: boolean;
@@ -107,7 +126,7 @@ export const searchTodos = async (
 export const createTodo = async (
   title: string,
   dueDate: string | null,
-  dueTimeSet: boolean
+  dueTimeSet: boolean,
 ): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/todos`, {
     method: "POST",
@@ -136,7 +155,7 @@ export const updateTodo = async (
   id: number,
   title: string,
   dueDate: string | null,
-  dueTimeSet: boolean
+  dueTimeSet: boolean,
 ) => {
   const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
     method: "PUT",

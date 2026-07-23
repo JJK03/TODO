@@ -1,6 +1,6 @@
 .todo-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px 42px 42px;
+  grid-template-columns: minmax(0, 1fr) 92px 42px 42px 42px;
   align-items: center;
   gap: 10px;
   min-height: 68px;
@@ -142,6 +142,54 @@
   color: #8a94a6;
 }
 
+.priority-select {
+  width: 92px;
+  min-height: 36px;
+  padding: 0 28px 0 10px;
+  border: 1px solid #d8c8b9;
+  border-radius: 999px;
+  color: #42514d;
+  background-color: #fff8ed;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.priority-select:hover {
+  border-color: #c8b39f;
+  background-color: #fffdf8;
+}
+
+.priority-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(214, 95, 70, 0.17);
+}
+
+.priority-low {
+  border-color: #c6d8c6;
+  color: #386349;
+  background-color: #edf7ed;
+}
+
+.priority-medium {
+  border-color: #e2c686;
+  color: #7a5618;
+  background-color: #fff5cf;
+}
+
+.priority-high {
+  border-color: #f0a39b;
+  color: #a23c31;
+  background-color: #ffe5e1;
+}
+
 .save-button {
   border: 1px solid var(--primary);
   color: #ffffff;
@@ -199,7 +247,7 @@
 
 @media (max-width: 640px) {
   .todo-item {
-    grid-template-columns: minmax(0, 1fr) 38px 38px 38px;
+    grid-template-columns: minmax(0, 1fr) 82px 38px 38px 38px;
     align-items: center;
   }
 
@@ -215,5 +263,12 @@
   .icon-button svg {
     width: 18px;
     height: 18px;
+  }
+
+  .priority-select {
+    width: 82px;
+    min-height: 34px;
+    padding-right: 22px;
+    font-size: 11px;
   }
 }

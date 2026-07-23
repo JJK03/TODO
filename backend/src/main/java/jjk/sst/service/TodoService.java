@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jjk.sst.domain.Todo;
+import jjk.sst.domain.TodoPriority;
 import jjk.sst.exception.TodoNotFoundException;
 import jjk.sst.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,13 @@ public class TodoService {
         return Sort.by(direction, "id");
     }
 
+    private TodoPriority normalizePriority(TodoPriority priority) {
+        return priority == null ? TodoPriority.LOW : priority;
+    }
+
     @Transactional
-    public Todo create(String title, LocalDateTime dueDate, boolean dueTimeSet) {
-        Todo todo = new Todo(title, false, dueDate, dueTimeSet);
+    public Todo create(String title, LocalDateTime dueDate, boolean dueTimeSet, TodoPriority priority) {
+        Todo todo = new Todo(title, false, dueDate, dueTimeSet, normalizePriority(priority));
         return todoRepository.save(todo);
     }
 
@@ -47,6 +52,13 @@ public class TodoService {
     public Todo update(Long id, String title, LocalDateTime dueDate, boolean dueTimeSet) {
         Todo todo = findById(id);
         todo.updateTitle(title, dueDate, dueTimeSet);
+        return todo;
+    }
+
+    @Transactional
+    public Todo updatePriority(Long id, TodoPriority priority) {
+        Todo todo = findById(id);
+        todo.updatePriority(normalizePriority(priority));
         return todo;
     }
 

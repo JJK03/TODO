@@ -1,4 +1,4 @@
-import type { Todo } from "../../types/todo";
+import type { Todo, TodoPriority } from "../../types/todo";
 import "./TodoItem.css";
 
 type TodoItemProps = {
@@ -11,6 +11,7 @@ type TodoItemProps = {
   onEditSubmit: (id: number) => void;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onPriorityChange: (id: number, priority: TodoPriority) => void;
 };
 
 const CheckCircleIcon = () => (
@@ -77,6 +78,7 @@ export default function TodoItem({
   onEditSubmit,
   onToggle,
   onDelete,
+  onPriorityChange,
 }: TodoItemProps) {
   return (
     <li className={todo.completed ? "todo-item completed" : "todo-item"}>
@@ -109,6 +111,20 @@ export default function TodoItem({
           </div>
         </div>
       )}
+
+      <select
+        className={`priority-select priority-${todo.priority.toLowerCase()}`}
+        value={todo.priority}
+        onChange={(e) =>
+          onPriorityChange(todo.id, e.target.value as TodoPriority)
+        }
+        aria-label={`${todo.title} 우선순위`}
+        title="우선순위"
+      >
+        <option value="LOW">낮음</option>
+        <option value="MEDIUM">보통</option>
+        <option value="HIGH">높음</option>
+      </select>
 
       <button
         className="status-button icon-button"

@@ -1,4 +1,4 @@
-import type { Todo } from "../../types/todo";
+import type { Todo, TodoPriority } from "../../types/todo";
 import TodoItem from "../TodoItem/TodoItem";
 import "./TodoList.css";
 
@@ -12,6 +12,7 @@ type TodoListProps = {
   onEditSubmit: (id: number) => void;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onPriorityChange: (id: number, priority: TodoPriority) => void;
 };
 
 export default function TodoList({
@@ -24,6 +25,7 @@ export default function TodoList({
   onEditSubmit,
   onToggle,
   onDelete,
+  onPriorityChange,
 }: TodoListProps) {
   return (
     <ul className="todo-list">
@@ -39,6 +41,7 @@ export default function TodoList({
           onEditSubmit={onEditSubmit}
           onToggle={onToggle}
           onDelete={onDelete}
+          onPriorityChange={onPriorityChange}
         />
       ))}
     </ul>

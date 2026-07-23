@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./TodoForm.css";
 
 type TodoFormProps = {
   title: string;
   dueDate: string;
   dueTimeSet: boolean;
-  resetSignal: number;
   onTitleChange: (title: string) => void;
   onDueDateChange: (dueDate: string) => void;
   onDueTimeSetChange: (dueTimeSet: boolean) => void;
@@ -38,7 +37,6 @@ export default function TodoForm({
   title,
   dueDate,
   dueTimeSet,
-  resetSignal,
   onTitleChange,
   onDueDateChange,
   onDueTimeSetChange,
@@ -46,10 +44,6 @@ export default function TodoForm({
 }: TodoFormProps) {
   const [isDueDateOpen, setIsDueDateOpen] = useState(false);
   const { date, time } = splitDueDate(dueDate);
-
-  useEffect(() => {
-    setIsDueDateOpen(false);
-  }, [resetSignal]);
 
   const handleDateChange = (nextDate: string) => {
     onDueDateChange(joinDueDate(nextDate, time));

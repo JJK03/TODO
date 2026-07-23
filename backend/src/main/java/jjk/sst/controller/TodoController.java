@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import jjk.sst.domain.Todo;
 import jjk.sst.dto.TodoCreateRequest;
+import jjk.sst.dto.TodoPriorityUpdateRequest;
 import jjk.sst.dto.TodoResponse;
 import jjk.sst.dto.TodoUpdateRequest;
 import jjk.sst.service.TodoService;
@@ -29,9 +30,18 @@ public class TodoController {
 
     private final TodoService todoService;
 
+    @PatchMapping("/{id}/priority")
+    public TodoResponse updatePriority(
+            @PathVariable(name = "id") Long id,
+            @RequestBody TodoPriorityUpdateRequest request) {
+        Todo todo = todoService.updatePriority(id, request.getPriority());
+        return new TodoResponse(todo);
+    }
+
     @PostMapping
     public TodoResponse create(@Valid @RequestBody TodoCreateRequest request) {
-        Todo todo = todoService.create(request.getTitle(), request.getDueDate(), request.isDueTimeSet());
+        Todo todo = todoService.create(request.getTitle(), request.getDueDate(), request.isDueTimeSet(),
+                request.getPriority());
         return new TodoResponse(todo);
     }
 

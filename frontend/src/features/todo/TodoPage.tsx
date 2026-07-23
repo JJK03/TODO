@@ -6,6 +6,7 @@ import {
   searchTodos,
   toggleTodo,
   updateTodo,
+  updateTodoPriority,
   type TodoPageResponse,
 } from "./api/todoAPI";
 
@@ -14,7 +15,7 @@ import TodoHeader from "./components/TodoHeader/TodoHeader";
 import TodoList from "./components/TodoList/TodoList";
 import TodoSort from "./components/TodoSort/TodoSort";
 
-import type { Todo } from "./types/todo";
+import type { TodoPriority, Todo } from "./types/todo";
 import type { SortOption } from "./types/sort";
 import "./TodoPage.css";
 
@@ -39,6 +40,12 @@ const createEmptyPage = (): TodoPageResponse => ({
   first: true,
   last: true,
 });
+
+const priorityOrder: Record<TodoPriority, number> = {
+  HIGH: 0,
+  MEDIUM: 1,
+  LOW: 2,
+};
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -93,7 +100,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 false,
                 nextPendingPageNumber,
                 PAGE_SIZE,
-                sortDirection
+                sortDirection,
               )
             : getTodos({
                 completed: false,
@@ -107,7 +114,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 true,
                 nextCompletedPageNumber,
                 PAGE_SIZE,
-                sortDirection
+                sortDirection,
               )
             : getTodos({
                 completed: true,
@@ -132,6 +139,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadTodoPages();
   }, [loadTodoPages]);
 
@@ -155,6 +163,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     }
 
     void handleSearchReset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetToken]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -163,7 +172,11 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     if (title.trim() === "") return;
 
     try {
-      await createTodo(title.trim(), dueDate === "" ? null : dueDate, dueTimeSet);
+      await createTodo(
+        title.trim(),
+        dueDate === "" ? null : dueDate,
+        dueTimeSet,
+      );
       setTitle("");
       setDueDate("");
       setDueTimeSet(false);
@@ -233,6 +246,16 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     }
   };
 
+  const handlePriorityChange = async (id: number, priority: TodoPriority) => {
+    try {
+      await updateTodoPriority(id, priority);
+      await loadTodoPages();
+    } catch (error: unknown) {
+      console.error(error);
+      showErrorMessage(getErrorMessage(error));
+    }
+  };
+
   const handleEditStart = (todo: Todo) => {
     setEditingTodoId(todo.id);
     setEditingTitle(todo.title);
@@ -255,7 +278,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
         id,
         editingTitle.trim(),
         todo?.dueDate ?? null,
-        todo?.dueTimeSet ?? false
+        todo?.dueTimeSet ?? false,
       );
       setEditingTodoId(null);
       setEditingTitle("");
@@ -270,6 +293,10 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     [...todos].sort((a, b) => {
       if (sortOption === "title") {
         return a.title.localeCompare(b.title);
+      }
+
+      if (sortOption === "priority") {
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
       }
 
       return 0;
@@ -290,6 +317,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
       onEditSubmit={handleEditSubmit}
       onToggle={handleToggle}
       onDelete={handleDelete}
+      onPriorityChange={handlePriorityChange}
     />
   );
 
@@ -337,10 +365,10 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
 
       <div className="input-row">
         <TodoForm
+          key={todoFormResetSignal}
           title={title}
           dueDate={dueDate}
           dueTimeSet={dueTimeSet}
-          resetSignal={todoFormResetSignal}
           onTitleChange={setTitle}
           onDueDateChange={setDueDate}
           onDueTimeSetChange={setDueTimeSet}
