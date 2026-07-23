@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import jjk.sst.domain.TodoPriority;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,5 +18,4 @@ public class TodoCreateRequest {
     private LocalDateTime dueDate;
     private boolean dueTimeSet;
 
-    private TodoPriority priority;
 }

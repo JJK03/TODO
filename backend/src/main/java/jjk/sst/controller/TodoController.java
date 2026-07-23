@@ -41,7 +41,7 @@ public class TodoController {
     @PostMapping
     public TodoResponse create(@Valid @RequestBody TodoCreateRequest request) {
         Todo todo = todoService.create(request.getTitle(), request.getDueDate(), request.isDueTimeSet(),
-                request.getPriority());
+                null);
         return new TodoResponse(todo);
     }
 
