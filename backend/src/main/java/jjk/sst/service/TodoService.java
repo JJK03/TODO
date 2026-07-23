@@ -1,5 +1,6 @@
 package jjk.sst.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -26,8 +27,8 @@ public class TodoService {
     }
 
     @Transactional
-    public Todo create(String title) {
-        Todo todo = new Todo(title, false);
+    public Todo create(String title, LocalDateTime dueDate, boolean dueTimeSet) {
+        Todo todo = new Todo(title, false, dueDate, dueTimeSet);
         return todoRepository.save(todo);
     }
 
@@ -43,9 +44,9 @@ public class TodoService {
     }
 
     @Transactional
-    public Todo update(Long id, String title) {
+    public Todo update(Long id, String title, LocalDateTime dueDate, boolean dueTimeSet) {
         Todo todo = findById(id);
-        todo.updateTitle(title);
+        todo.updateTitle(title, dueDate, dueTimeSet);
         return todo;
     }
 

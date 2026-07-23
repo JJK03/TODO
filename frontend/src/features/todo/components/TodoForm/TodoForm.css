@@ -1,6 +1,6 @@
 .todo-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px;
+  grid-template-columns: minmax(0, 1fr) 44px 76px;
   gap: 10px;
   margin-bottom: 0;
 }
@@ -28,10 +28,7 @@
 
 .todo-form button {
   min-height: 44px;
-  border: 1px solid var(--primary);
   border-radius: 8px;
-  color: #ffffff;
-  background: var(--primary);
   font-size: 13px;
   font-weight: 800;
   transition:
@@ -41,7 +38,13 @@
     transform 160ms ease;
 }
 
-.todo-form button:hover {
+.todo-form > button[type="submit"] {
+  border: 1px solid var(--primary);
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.todo-form > button[type="submit"]:hover {
   border-color: var(--primary-hover);
   background: var(--primary-hover);
 }
@@ -50,8 +53,116 @@
   transform: translateY(1px);
 }
 
+.due-date-picker {
+  position: relative;
+  min-width: 0;
+}
+
+.due-date-toggle {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #d8c8b9;
+  color: #42514d;
+  background: #fff8ed;
+}
+
+.due-date-toggle:hover,
+.due-date-toggle.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fffdf8;
+}
+
+.due-date-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.due-date-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 20;
+  width: min(260px, calc(100vw - 32px));
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ded1c2;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 16px 34px rgba(36, 54, 50, 0.18);
+}
+
+.due-date-popover::before {
+  position: absolute;
+  top: -6px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  content: "";
+  border-left: 1px solid #ded1c2;
+  border-top: 1px solid #ded1c2;
+  background: var(--surface);
+  transform: rotate(45deg);
+}
+
+.due-date-popover label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.due-date-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 12px;
+  line-height: 1;
+}
+
+.due-date-popover input {
+  position: relative;
+  z-index: 1;
+  min-height: 35px;
+}
+
+.due-date-popover input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.due-date-popover .due-date-clear {
+  flex: 0 0 auto;
+  min-height: 0;
+  height: auto;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.due-date-popover .due-date-clear:hover {
+  color: var(--primary);
+}
+
 @media (max-width: 640px) {
   .todo-form {
-    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-columns: minmax(0, 1fr) 44px 68px;
   }
 }

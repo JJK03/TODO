@@ -31,7 +31,7 @@ public class TodoController {
 
     @PostMapping
     public TodoResponse create(@Valid @RequestBody TodoCreateRequest request) {
-        Todo todo = todoService.create(request.getTitle());
+        Todo todo = todoService.create(request.getTitle(), request.getDueDate(), request.isDueTimeSet());
         return new TodoResponse(todo);
     }
 
@@ -45,7 +45,7 @@ public class TodoController {
     public TodoResponse update(
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody TodoUpdateRequest request) {
-        Todo todo = todoService.update(id, request.getTitle());
+        Todo todo = todoService.update(id, request.getTitle(), request.getDueDate(), request.isDueTimeSet());
         return new TodoResponse(todo);
     }
 

@@ -3,4 +3,6 @@ export type Todo = {
   title: string;
   completed: boolean;
   createdAt: string;
+  dueDate: string | null;
+  dueTimeSet: boolean;
 };

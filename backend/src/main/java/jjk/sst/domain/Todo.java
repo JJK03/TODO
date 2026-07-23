@@ -30,19 +30,26 @@ public class Todo {
     @Column
     private LocalDateTime updatedAt;
 
+    private LocalDateTime dueDate;
+    private boolean dueTimeSet;
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
     }
 
-    public Todo(String title, boolean completed) {
+    public Todo(String title, boolean completed, LocalDateTime dueDate, boolean dueTimeSet) {
         this.title = title;
         this.completed = completed;
+        this.dueDate = dueDate;
+        this.dueTimeSet = dueTimeSet;
     }
 
-    public void updateTitle(String title) {
+    public void updateTitle(String title, LocalDateTime dueDate, boolean dueTimeSet) {
         this.title = title;
+        this.dueDate = dueDate;
+        this.dueTimeSet = dueTimeSet;
         this.updatedAt = LocalDateTime.now();
     }
 

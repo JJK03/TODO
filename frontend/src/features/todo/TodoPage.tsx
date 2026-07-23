@@ -49,12 +49,10 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export default function TodoPage({ resetToken }: TodoPageProps) {
-  const [pendingPage, setPendingPage] = useState<TodoPageResponse>(
-    createEmptyPage
-  );
-  const [completedPage, setCompletedPage] = useState<TodoPageResponse>(
-    createEmptyPage
-  );
+  const [pendingPage, setPendingPage] =
+    useState<TodoPageResponse>(createEmptyPage);
+  const [completedPage, setCompletedPage] =
+    useState<TodoPageResponse>(createEmptyPage);
   const [pendingPageNumber, setPendingPageNumber] = useState(0);
   const [completedPageNumber, setCompletedPageNumber] = useState(0);
   const [title, setTitle] = useState("");
@@ -66,6 +64,10 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("latest");
+  const [dueDate, setDueDate] = useState("");
+  const [dueTimeSet, setDueTimeSet] = useState(false);
+  const [todoFormResetSignal, setTodoFormResetSignal] = useState(0);
+
   const didMountRef = useRef(false);
 
   const showErrorMessage = useCallback((message: string) => {
@@ -89,7 +91,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 searchKeyword,
                 false,
                 nextPendingPageNumber,
-                PAGE_SIZE
+                PAGE_SIZE,
               )
             : getTodos({
                 completed: false,
@@ -101,7 +103,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 searchKeyword,
                 true,
                 nextCompletedPageNumber,
-                PAGE_SIZE
+                PAGE_SIZE,
               )
             : getTodos({
                 completed: true,
@@ -121,7 +123,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
         setIsLoading(false);
       }
     },
-    [activeKeyword, completedPageNumber, pendingPageNumber]
+    [activeKeyword, completedPageNumber, pendingPageNumber],
   );
 
   useEffect(() => {
@@ -156,8 +158,11 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     if (title.trim() === "") return;
 
     try {
-      await createTodo(title.trim());
+      await createTodo(title.trim(), dueDate === "" ? null : dueDate, dueTimeSet);
       setTitle("");
+      setDueDate("");
+      setDueTimeSet(false);
+      setTodoFormResetSignal((signal) => signal + 1);
       setPendingPageNumber(0);
       await loadTodoPages({ pendingPageNumber: 0 });
     } catch (error: unknown) {
@@ -236,8 +241,17 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
   const handleEditSubmit = async (id: number) => {
     if (editingTitle.trim() === "") return;
 
+    const todo = [...pendingPage.content, ...completedPage.content].find(
+      (todo) => todo.id === id,
+    );
+
     try {
-      await updateTodo(id, editingTitle.trim());
+      await updateTodo(
+        id,
+        editingTitle.trim(),
+        todo?.dueDate ?? null,
+        todo?.dueTimeSet ?? false
+      );
       setEditingTodoId(null);
       setEditingTitle("");
       await loadTodoPages();
@@ -288,7 +302,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
 
   const renderPagination = (
     page: TodoPageResponse,
-    onPageChange: (nextPageNumber: number) => void
+    onPageChange: (nextPageNumber: number) => void,
   ) => (
     <div className="column-pagination">
       <button
@@ -331,7 +345,12 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
       <div className="input-row">
         <TodoForm
           title={title}
+          dueDate={dueDate}
+          dueTimeSet={dueTimeSet}
+          resetSignal={todoFormResetSignal}
           onTitleChange={setTitle}
+          onDueDateChange={setDueDate}
+          onDueTimeSetChange={setDueTimeSet}
           onSubmit={handleSubmit}
         />
 

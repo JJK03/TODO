@@ -96,13 +96,17 @@ export const searchTodos = async (
   return normalizePage(data);
 };
 
-export const createTodo = async (title: string): Promise<void> => {
+export const createTodo = async (
+  title: string,
+  dueDate: string | null,
+  dueTimeSet: boolean
+): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/todos`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ title }),
+    body: JSON.stringify({ title, dueDate, dueTimeSet }),
   });
 
   if (!response.ok) {
@@ -120,13 +124,18 @@ export const toggleTodo = async (id: number): Promise<void> => {
   }
 };
 
-export const updateTodo = async (id: number, title: string) => {
+export const updateTodo = async (
+  id: number,
+  title: string,
+  dueDate: string | null,
+  dueTimeSet: boolean
+) => {
   const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ title }),
+    body: JSON.stringify({ title, dueDate, dueTimeSet }),
   });
 
   if (!response.ok) {

@@ -57,6 +57,16 @@ const UndoIcon = () => (
   </svg>
 );
 
+const formatDueDate = (dueDate: string, dueTimeSet: boolean) => {
+  const date = new Date(dueDate);
+
+  if (!dueTimeSet) {
+    return date.toLocaleDateString();
+  }
+
+  return date.toLocaleString();
+};
+
 export default function TodoItem({
   todo,
   isEditing,
@@ -91,9 +101,11 @@ export default function TodoItem({
         <div className="todo-text">
           <span className="todo-title">{todo.title}</span>
           <div className="todo-dates">
-            <span className="todo-date">
-              작성: {new Date(todo.createdAt).toLocaleString()}
-            </span>
+            {todo.dueDate && (
+              <span className="todo-date">
+                마감: {formatDueDate(todo.dueDate, todo.dueTimeSet)}
+              </span>
+            )}
           </div>
         </div>
       )}
