@@ -1,40 +1,99 @@
-﻿import type { Todo } from "../types/todo";
+import type { Todo } from "../types/todo";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export type TodoPageResponse = {
+  content: Todo[];
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+};
+
+type GetTodosParams = {
+  completed?: boolean;
+  page?: number;
+  size?: number;
+};
 
 const handleErrorResponse = async (response: Response) => {
   const errorData = await response.json();
 
-  throw new Error(
-    errorData.message ?? `요청 실패: ${response.status}`
-  );
-}
-
-export const getTodos = async (completedFilter = "all"): Promise<Todo[]> => {
-  const url =
-    completedFilter === "all"
-      ? `${API_BASE_URL}/todos`
-      : `${API_BASE_URL}/todos?completed=${completedFilter}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    await handleErrorResponse(response);
-  }
-
-  return response.json();
+  throw new Error(errorData.message ?? `요청 실패: ${response.status}`);
 };
 
-export const searchTodos = async (keyword: string): Promise<Todo[]> => {
+const normalizePage = (data: Todo[] | TodoPageResponse): TodoPageResponse => {
+  if (!Array.isArray(data)) {
+    return data;
+  }
+
+  return {
+    content: data,
+    number: 0,
+    size: data.length,
+    totalElements: data.length,
+    totalPages: data.length > 0 ? 1 : 0,
+    first: true,
+    last: true,
+  };
+};
+
+const buildQueryString = (params: Record<string, string | number | boolean>) =>
+  new URLSearchParams(
+    Object.entries(params).map(([key, value]) => [key, String(value)])
+  ).toString();
+
+export const getTodos = async ({
+  completed,
+  page = 0,
+  size = 6,
+}: GetTodosParams = {}): Promise<TodoPageResponse> => {
+  const queryParams: Record<string, string | number | boolean> = { page, size };
+
+  if (completed !== undefined) {
+    queryParams.completed = completed;
+  }
+
   const response = await fetch(
-    `${API_BASE_URL}/todos/search?keyword=${encodeURIComponent(keyword)}`
+    `${API_BASE_URL}/todos?${buildQueryString(queryParams)}`
   );
 
   if (!response.ok) {
     await handleErrorResponse(response);
   }
 
-  return response.json();
+  const data = await response.json();
+  return normalizePage(data);
+};
+
+export const searchTodos = async (
+  keyword: string,
+  completed?: boolean,
+  page = 0,
+  size = 6
+): Promise<TodoPageResponse> => {
+  const queryParams: Record<string, string | number | boolean> = {
+    keyword,
+    page,
+    size,
+  };
+
+  if (completed !== undefined) {
+    queryParams.completed = completed;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/todos/search?${buildQueryString(queryParams)}`
+  );
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
+  const data = await response.json();
+  return normalizePage(data);
 };
 
 export const createTodo = async (title: string): Promise<void> => {

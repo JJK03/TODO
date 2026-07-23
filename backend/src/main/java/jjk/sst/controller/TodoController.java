@@ -1,7 +1,6 @@
 package jjk.sst.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,31 +35,6 @@ public class TodoController {
         return new TodoResponse(todo);
     }
 
-    @GetMapping
-    public List<TodoResponse> findAll(
-            @RequestParam(name = "completed", required = false) Boolean completed,
-            @RequestParam(name = "sort", defaultValue = "desc") String sort) {
-
-        List<Todo> todos;
-
-        if (completed == null) {
-            todos = todoService.findAll(sort);
-        } else {
-            todos = todoService.findByCompleted(completed, sort);
-        }
-
-        return todos.stream()
-                .map(TodoResponse::new)
-                .toList();
-    }
-
-    @GetMapping("/search")
-    public List<TodoResponse> search(
-            @RequestParam(name = "keyword") String keyword,
-            @RequestParam(name = "sort", defaultValue = "desc") String sort) {
-        return todoService.searchByTitle(keyword, sort).stream().map(TodoResponse::new).toList();
-    }
-
     @GetMapping("/{id}")
     public TodoResponse findById(@PathVariable(name = "id") Long id) {
         Todo todo = todoService.findById(id);
@@ -85,6 +59,43 @@ public class TodoController {
     public TodoResponse toggle(@PathVariable(name = "id") Long id) {
         Todo todo = todoService.toggle(id);
         return new TodoResponse(todo);
+    }
+
+    @GetMapping
+    public Page<TodoResponse> findAll(
+            @RequestParam(name = "completed", required = false) Boolean completed,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "6") int size,
+            @RequestParam(name = "sort", defaultValue = "desc") String sort) {
+
+        Page<Todo> todos;
+
+        if (completed == null) {
+            todos = todoService.findAllWithPaging(page, size, sort);
+        } else {
+            todos = todoService.findByCompletedWithPaging(completed, page, size, sort);
+        }
+
+        return todos.map(TodoResponse::new);
+    }
+
+    @GetMapping("/search")
+    public Page<TodoResponse> search(
+            @RequestParam(name = "keyword") String keyword,
+            @RequestParam(name = "completed", required = false) Boolean completed,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "6") int size,
+            @RequestParam(name = "sort", defaultValue = "desc") String sort) {
+
+        Page<Todo> todos;
+
+        if (completed == null) {
+            todos = todoService.searchByTitleWithPaging(keyword, page, size, sort);
+        } else {
+            todos = todoService.searchByTitleAndCompletedWithPaging(keyword, completed, page, size, sort);
+        }
+
+        return todos.map(TodoResponse::new);
     }
 
 }

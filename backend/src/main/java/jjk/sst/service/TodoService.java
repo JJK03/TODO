@@ -2,6 +2,9 @@ package jjk.sst.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,5 +71,34 @@ public class TodoService {
     @Transactional(readOnly = true)
     public List<Todo> searchByTitle(String keyword, String sort) {
         return todoRepository.findByTitleContaining(keyword, createSort(sort));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Todo> findAllWithPaging(int page, int size, String sort) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sort));
+        return todoRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Todo> findByCompletedWithPaging(boolean completed, int page, int size, String sort) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sort));
+        return todoRepository.findByCompleted(completed, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Todo> searchByTitleWithPaging(String keyword, int page, int size, String sort) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sort));
+        return todoRepository.findByTitleContaining(keyword, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Todo> searchByTitleAndCompletedWithPaging(
+            String keyword,
+            boolean completed,
+            int page,
+            int size,
+            String sort) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sort));
+        return todoRepository.findByTitleContainingAndCompleted(keyword, completed, pageable);
     }
 }

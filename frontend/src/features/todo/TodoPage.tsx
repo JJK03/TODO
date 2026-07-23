@@ -6,6 +6,7 @@ import {
   searchTodos,
   toggleTodo,
   updateTodo,
+  type TodoPageResponse,
 } from "./api/todoAPI";
 
 import TodoForm from "./components/TodoForm/TodoForm";
@@ -21,6 +22,24 @@ type TodoPageProps = {
   resetToken: number;
 };
 
+type LoadTodoPagesOptions = {
+  pendingPageNumber?: number;
+  completedPageNumber?: number;
+  searchKeyword?: string;
+};
+
+const PAGE_SIZE = 6;
+
+const createEmptyPage = (): TodoPageResponse => ({
+  content: [],
+  number: 0,
+  size: PAGE_SIZE,
+  totalElements: 0,
+  totalPages: 0,
+  first: true,
+  last: true,
+});
+
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message;
@@ -30,9 +49,17 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export default function TodoPage({ resetToken }: TodoPageProps) {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [pendingPage, setPendingPage] = useState<TodoPageResponse>(
+    createEmptyPage
+  );
+  const [completedPage, setCompletedPage] = useState<TodoPageResponse>(
+    createEmptyPage
+  );
+  const [pendingPageNumber, setPendingPageNumber] = useState(0);
+  const [completedPageNumber, setCompletedPageNumber] = useState(0);
   const [title, setTitle] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [activeKeyword, setActiveKeyword] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -45,72 +72,73 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     setErrorMessage(message);
   }, []);
 
-  const fetchTodos = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage("");
+  const loadTodoPages = useCallback(
+    async ({
+      pendingPageNumber: nextPendingPageNumber = pendingPageNumber,
+      completedPageNumber: nextCompletedPageNumber = completedPageNumber,
+      searchKeyword = activeKeyword,
+    }: LoadTodoPagesOptions = {}) => {
+      setIsLoading(true);
+      setErrorMessage("");
 
-    try {
-      const data = await getTodos();
-      setTodos(data);
-    } catch (error: unknown) {
-      console.error(error);
-      setTodos([]);
-      setErrorMessage(getErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const isSearching = searchKeyword !== "";
+        const [nextPendingPage, nextCompletedPage] = await Promise.all([
+          isSearching
+            ? searchTodos(
+                searchKeyword,
+                false,
+                nextPendingPageNumber,
+                PAGE_SIZE
+              )
+            : getTodos({
+                completed: false,
+                page: nextPendingPageNumber,
+                size: PAGE_SIZE,
+              }),
+          isSearching
+            ? searchTodos(
+                searchKeyword,
+                true,
+                nextCompletedPageNumber,
+                PAGE_SIZE
+              )
+            : getTodos({
+                completed: true,
+                page: nextCompletedPageNumber,
+                size: PAGE_SIZE,
+              }),
+        ]);
+
+        setPendingPage(nextPendingPage);
+        setCompletedPage(nextCompletedPage);
+      } catch (error: unknown) {
+        console.error(error);
+        setPendingPage(createEmptyPage());
+        setCompletedPage(createEmptyPage());
+        setErrorMessage(getErrorMessage(error));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [activeKeyword, completedPageNumber, pendingPageNumber]
+  );
 
   useEffect(() => {
-    const loadTodos = async () => {
-      await fetchTodos();
-    };
-
-    void loadTodos();
-  }, [fetchTodos]);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (title.trim() === "") return;
-
-    try {
-      await createTodo(title.trim());
-      setTitle("");
-      await fetchTodos();
-    } catch (error: unknown) {
-      console.error(error);
-      showErrorMessage(getErrorMessage(error));
-    }
-  };
-
-  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (keyword.trim() === "") {
-      await fetchTodos();
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMessage("");
-
-    try {
-      const data = await searchTodos(keyword.trim());
-      setTodos(data);
-    } catch (error: unknown) {
-      console.error(error);
-      setTodos([]);
-      showErrorMessage(getErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    void loadTodoPages();
+  }, [loadTodoPages]);
 
   const handleSearchReset = async () => {
     setKeyword("");
+    setActiveKeyword("");
     setIsSearchOpen(false);
-    await fetchTodos();
+    setPendingPageNumber(0);
+    setCompletedPageNumber(0);
+    await loadTodoPages({
+      pendingPageNumber: 0,
+      completedPageNumber: 0,
+      searchKeyword: "",
+    });
   };
 
   useEffect(() => {
@@ -122,19 +150,63 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     void handleSearchReset();
   }, [resetToken]);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (title.trim() === "") return;
+
+    try {
+      await createTodo(title.trim());
+      setTitle("");
+      setPendingPageNumber(0);
+      await loadTodoPages({ pendingPageNumber: 0 });
+    } catch (error: unknown) {
+      console.error(error);
+      showErrorMessage(getErrorMessage(error));
+    }
+  };
+
+  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (keyword.trim() === "") {
+      await handleSearchReset();
+      return;
+    }
+
+    const nextKeyword = keyword.trim();
+
+    setActiveKeyword(nextKeyword);
+    setPendingPageNumber(0);
+    setCompletedPageNumber(0);
+    await loadTodoPages({
+      pendingPageNumber: 0,
+      completedPageNumber: 0,
+      searchKeyword: nextKeyword,
+    });
+  };
+
   const handleSearchToggle = async () => {
-    if (isSearchOpen && keyword.trim() !== "") {
-      setKeyword("");
-      await fetchTodos();
+    if (isSearchOpen && (keyword.trim() !== "" || activeKeyword !== "")) {
+      await handleSearchReset();
+      return;
     }
 
     setIsSearchOpen((current) => !current);
   };
 
+  const handlePendingPageChange = (nextPageNumber: number) => {
+    setPendingPageNumber(nextPageNumber);
+  };
+
+  const handleCompletedPageChange = (nextPageNumber: number) => {
+    setCompletedPageNumber(nextPageNumber);
+  };
+
   const handleToggle = async (id: number) => {
     try {
       await toggleTodo(id);
-      await fetchTodos();
+      await loadTodoPages();
     } catch (error: unknown) {
       console.error(error);
       showErrorMessage(getErrorMessage(error));
@@ -144,7 +216,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
   const handleDelete = async (id: number) => {
     try {
       await deleteTodo(id);
-      await fetchTodos();
+      await loadTodoPages();
     } catch (error: unknown) {
       console.error(error);
       showErrorMessage(getErrorMessage(error));
@@ -168,31 +240,37 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
       await updateTodo(id, editingTitle.trim());
       setEditingTodoId(null);
       setEditingTitle("");
-      await fetchTodos();
+      await loadTodoPages();
     } catch (error: unknown) {
       console.error(error);
       showErrorMessage(getErrorMessage(error));
     }
   };
 
-  const sortedTodos = [...todos].sort((a, b) => {
-    if (sortOption === "latest") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
+  const sortTodos = (todos: Todo[]) =>
+    [...todos].sort((a, b) => {
+      if (sortOption === "latest") {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
 
-    if (sortOption === "oldest") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    }
+      if (sortOption === "oldest") {
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      }
 
-    if (sortOption === "title") {
-      return a.title.localeCompare(b.title);
-    }
+      if (sortOption === "title") {
+        return a.title.localeCompare(b.title);
+      }
 
-    return 0;
-  });
+      return 0;
+    });
 
-  const pendingTodos = sortedTodos.filter((todo) => !todo.completed);
-  const completedTodos = sortedTodos.filter((todo) => todo.completed);
+  const pendingTodos = sortTodos(pendingPage.content);
+  const completedTodos = sortTodos(completedPage.content);
+  const todoCount = pendingPage.totalElements + completedPage.totalElements;
 
   const renderTodoList = (items: Todo[]) => (
     <TodoList
@@ -208,6 +286,31 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
     />
   );
 
+  const renderPagination = (
+    page: TodoPageResponse,
+    onPageChange: (nextPageNumber: number) => void
+  ) => (
+    <div className="column-pagination">
+      <button
+        type="button"
+        onClick={() => onPageChange(page.number - 1)}
+        disabled={page.first || page.totalPages === 0}
+      >
+        이전
+      </button>
+      <span>
+        {page.totalPages === 0 ? 0 : page.number + 1} / {page.totalPages}
+      </span>
+      <button
+        type="button"
+        onClick={() => onPageChange(page.number + 1)}
+        disabled={page.last || page.totalPages === 0}
+      >
+        다음
+      </button>
+    </div>
+  );
+
   return (
     <>
       {errorMessage && (
@@ -217,7 +320,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
       )}
 
       <TodoHeader
-        todoCount={todos.length}
+        todoCount={todoCount}
         keyword={keyword}
         isSearchOpen={isSearchOpen}
         onKeywordChange={setKeyword}
@@ -237,38 +340,40 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
         </div>
       </div>
 
-      {isLoading && todos.length === 0 && (
+      {isLoading && todoCount === 0 && (
         <p className="state-message">불러오는 중...</p>
       )}
 
-      {!isLoading && todos.length === 0 && (
+      {!isLoading && todoCount === 0 && (
         <p className="state-message empty-message">표시할 Todo가 없습니다.</p>
       )}
 
-      {todos.length > 0 && (
+      {todoCount > 0 && (
         <div className="todo-board">
           <section className="todo-column" aria-labelledby="pending-heading">
             <div className="todo-column-header">
               <h2 id="pending-heading">미완료</h2>
-              <span>{pendingTodos.length}개</span>
+              <span>{pendingPage.totalElements}개</span>
             </div>
             {pendingTodos.length > 0 ? (
               renderTodoList(pendingTodos)
             ) : (
               <p className="column-empty-message">미완료 Todo가 없습니다.</p>
             )}
+            {renderPagination(pendingPage, handlePendingPageChange)}
           </section>
 
           <section className="todo-column" aria-labelledby="completed-heading">
             <div className="todo-column-header">
               <h2 id="completed-heading">완료</h2>
-              <span>{completedTodos.length}개</span>
+              <span>{completedPage.totalElements}개</span>
             </div>
             {completedTodos.length > 0 ? (
               renderTodoList(completedTodos)
             ) : (
               <p className="column-empty-message">완료된 Todo가 없습니다.</p>
             )}
+            {renderPagination(completedPage, handleCompletedPageChange)}
           </section>
         </div>
       )}

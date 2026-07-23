@@ -1,6 +1,8 @@
 .todo-list {
   display: grid;
+  align-content: start;
   gap: 10px;
+  min-height: 458px;
   padding: 0;
   margin: 0;
   list-style: none;
