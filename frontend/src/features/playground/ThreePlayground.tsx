@@ -1,5 +1,14 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { planetConfigs } from "./solarSystemConfig";
+import {
+  createMoon,
+  createOrbitLine,
+  createPlanet,
+  createSaturnRing,
+  createStars,
+} from "./solarSystemObjects";
+import { disposeObject } from "./threeUtils";
 import "./ThreePlayground.css";
 
 export default function ThreePlayground() {
@@ -10,81 +19,6 @@ export default function ThreePlayground() {
 
     const container = containerRef.current;
 
-    const planetConfigs = [
-      {
-        name: "mercury",
-        size: 0.12,
-        distance: 1.1,
-        color: "#a6a6a6",
-        orbitSpeed: 0.025,
-        rotationSpeed: 0.02,
-        startAngle: 0.2,
-      },
-      {
-        name: "venus",
-        size: 0.2,
-        distance: 1.6,
-        color: "#d8b26e",
-        orbitSpeed: 0.018,
-        rotationSpeed: 0.012,
-        startAngle: 1.1,
-      },
-      {
-        name: "earth",
-        size: 0.22,
-        distance: 2.1,
-        color: "#3b82f6",
-        orbitSpeed: 0.014,
-        rotationSpeed: 0.03,
-        startAngle: 2.4,
-      },
-      {
-        name: "mars",
-        size: 0.18,
-        distance: 2.7,
-        color: "#d97745",
-        orbitSpeed: 0.011,
-        rotationSpeed: 0.025,
-        startAngle: 3.0,
-      },
-      {
-        name: "jupiter",
-        size: 0.45,
-        distance: 3.6,
-        color: "#d6a36a",
-        orbitSpeed: 0.007,
-        rotationSpeed: 0.04,
-        startAngle: 4.2,
-      },
-      {
-        name: "saturn",
-        size: 0.38,
-        distance: 4.6,
-        color: "#e5c77f",
-        orbitSpeed: 0.005,
-        rotationSpeed: 0.035,
-        startAngle: 5.1,
-      },
-      {
-        name: "uranus",
-        size: 0.3,
-        distance: 5.5,
-        color: "#7dd3fc",
-        orbitSpeed: 0.0035,
-        rotationSpeed: 0.025,
-        startAngle: 5.8,
-      },
-      {
-        name: "neptune",
-        size: 0.3,
-        distance: 6.3,
-        color: "#2563eb",
-        orbitSpeed: 0.0028,
-        rotationSpeed: 0.022,
-        startAngle: 0.9,
-      },
-    ];
-
     const planets: {
       name: string;
       mesh: THREE.Mesh;
@@ -94,56 +28,13 @@ export default function ThreePlayground() {
       rotationSpeed: number;
     }[] = [];
 
-    const disposeMaterial = (material: THREE.Material | THREE.Material[]) => {
-      if (Array.isArray(material)) {
-        material.forEach((item) => item.dispose());
-      } else {
-        material.dispose();
-      }
-    };
-
-    const disposeObject = (object: THREE.Object3D) => {
-      object.traverse((child) => {
-        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
-          child.geometry.dispose();
-          disposeMaterial(child.material);
-        }
-
-        if (child instanceof THREE.Points) {
-          child.geometry.dispose();
-          disposeMaterial(child.material);
-        }
-      });
-    };
-
     // 3D 공간 생성 (물체, 조명 넣는 곳)
     const scene = new THREE.Scene();
 
-    const starGeometry = new THREE.BufferGeometry();
-    const starCount = 800;
-    const starPositions = new Float32Array(starCount * 3);
-
-    for (let i = 0; i < starCount; i++) {
-      const i3 = i * 3;
-
-      starPositions[i3] = (Math.random() - 0.5) * 40; // x
-      starPositions[i3 + 1] = (Math.random() - 0.5) * 20; // y
-      starPositions[i3 + 2] = (Math.random() - 0.5) * 40; // z
-    }
-
-    starGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(starPositions, 3),
-    );
-
-    const starMaterial = new THREE.PointsMaterial({
-      color: "#ffffff",
-      size: 0.035,
-      sizeAttenuation: true,
-    });
-
-    const stars = new THREE.Points(starGeometry, starMaterial);
+    // 별 생성
+    const stars = createStars();
     scene.add(stars);
+
     // 원근감 카메라
     const camera = new THREE.PerspectiveCamera(
       60, // 시야각
@@ -177,68 +68,17 @@ export default function ThreePlayground() {
     scene.add(sunLight);
 
     planetConfigs.forEach((config) => {
-      const orbitGeometry = new THREE.BufferGeometry();
-      const orbitPoints = [];
-      const segmentCount = 128;
-
-      for (let i = 0; i <= segmentCount; i++) {
-        const angle = (i / segmentCount) * Math.PI * 2;
-
-        orbitPoints.push(
-          new THREE.Vector3(
-            Math.cos(angle) * config.distance,
-            0,
-            Math.sin(angle) * config.distance,
-          ),
-        );
-      }
-
-      orbitGeometry.setFromPoints(orbitPoints);
-
-      const orbitLine = new THREE.Line(
-        orbitGeometry,
-        new THREE.LineBasicMaterial({
-          color: "#ffffff",
-          transparent: true,
-          opacity: 0.25,
-        }),
-      );
-
+      // 궤도
+      const orbitLine = createOrbitLine(config.distance);
       scene.add(orbitLine);
 
-      const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(config.size, 32, 32),
-        new THREE.MeshStandardMaterial({
-          color: config.color,
-          roughness: 0.6,
-        }),
-      );
+      // 행성
+      const mesh = createPlanet(config);
 
+      // 토성 고리
       if (config.name === "saturn") {
-        const ringGeometry = new THREE.RingGeometry(
-          config.size * 1.35,
-          config.size * 2.1,
-          96,
-        );
-
-        const ringMaterial = new THREE.MeshStandardMaterial({
-          color: "#d8c48a",
-          roughness: 0.7,
-          metalness: 0.05,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.85,
-        });
-
-        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-
-        ring.rotation.x = Math.PI / 2.8;
-
-        mesh.add(ring);
+        mesh.add(createSaturnRing(config.size));
       }
-
-      mesh.position.x = Math.cos(config.startAngle) * config.distance;
-      mesh.position.z = Math.sin(config.startAngle) * config.distance;
 
       scene.add(mesh);
 
@@ -252,13 +92,7 @@ export default function ThreePlayground() {
       });
     });
 
-    const moon = new THREE.Mesh(
-      new THREE.SphereGeometry(0.06, 16, 16),
-      new THREE.MeshStandardMaterial({
-        color: "#cfd4d8",
-        roughness: 0.7,
-      }),
-    );
+    const moon = createMoon();
     scene.add(moon);
 
     const ambientLight = new THREE.AmbientLight("#ffffff", 0.25);
@@ -270,9 +104,9 @@ export default function ThreePlayground() {
 
     let animationId = 0;
 
-    const animate = () => {
-      const earth = planets.find((planet) => planet.name === "earth");
+    const earth = planets.find((planet) => planet.name === "earth");
 
+    const animate = () => {
       if (earth) {
         moonAngle += moonOrbitSpeed;
 
