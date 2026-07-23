@@ -16,6 +16,7 @@ type GetTodosParams = {
   completed?: boolean;
   page?: number;
   size?: number;
+  sort?: string;
 };
 
 const handleErrorResponse = async (response: Response) => {
@@ -49,8 +50,13 @@ export const getTodos = async ({
   completed,
   page = 0,
   size = 6,
+  sort = "desc",
 }: GetTodosParams = {}): Promise<TodoPageResponse> => {
-  const queryParams: Record<string, string | number | boolean> = { page, size };
+  const queryParams: Record<string, string | number | boolean> = {
+    page,
+    size,
+    sort,
+  };
 
   if (completed !== undefined) {
     queryParams.completed = completed;
@@ -72,12 +78,14 @@ export const searchTodos = async (
   keyword: string,
   completed?: boolean,
   page = 0,
-  size = 6
+  size = 6,
+  sort = "desc"
 ): Promise<TodoPageResponse> => {
   const queryParams: Record<string, string | number | boolean> = {
     keyword,
     page,
     size,
+    sort,
   };
 
   if (completed !== undefined) {

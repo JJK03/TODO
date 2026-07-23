@@ -85,6 +85,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
 
       try {
         const isSearching = searchKeyword !== "";
+        const sortDirection = sortOption === "oldest" ? "asc" : "desc";
         const [nextPendingPage, nextCompletedPage] = await Promise.all([
           isSearching
             ? searchTodos(
@@ -92,11 +93,13 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 false,
                 nextPendingPageNumber,
                 PAGE_SIZE,
+                sortDirection
               )
             : getTodos({
                 completed: false,
                 page: nextPendingPageNumber,
                 size: PAGE_SIZE,
+                sort: sortDirection,
               }),
           isSearching
             ? searchTodos(
@@ -104,11 +107,13 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
                 true,
                 nextCompletedPageNumber,
                 PAGE_SIZE,
+                sortDirection
               )
             : getTodos({
                 completed: true,
                 page: nextCompletedPageNumber,
                 size: PAGE_SIZE,
+                sort: sortDirection,
               }),
         ]);
 
@@ -123,7 +128,7 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
         setIsLoading(false);
       }
     },
-    [activeKeyword, completedPageNumber, pendingPageNumber],
+    [activeKeyword, completedPageNumber, pendingPageNumber, sortOption],
   );
 
   useEffect(() => {
@@ -263,18 +268,6 @@ export default function TodoPage({ resetToken }: TodoPageProps) {
 
   const sortTodos = (todos: Todo[]) =>
     [...todos].sort((a, b) => {
-      if (sortOption === "latest") {
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      }
-
-      if (sortOption === "oldest") {
-        return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      }
-
       if (sortOption === "title") {
         return a.title.localeCompare(b.title);
       }
