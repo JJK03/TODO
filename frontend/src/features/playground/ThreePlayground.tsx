@@ -86,6 +86,7 @@ export default function ThreePlayground() {
     ];
 
     const planets: {
+      name: string;
       mesh: THREE.Mesh;
       distance: number;
       angle: number;
@@ -93,14 +94,26 @@ export default function ThreePlayground() {
       rotationSpeed: number;
     }[] = [];
 
-    const disposeMesh = (mesh: THREE.Mesh) => {
-      mesh.geometry.dispose();
-
-      if (Array.isArray(mesh.material)) {
-        mesh.material.forEach((material) => material.dispose());
+    const disposeMaterial = (material: THREE.Material | THREE.Material[]) => {
+      if (Array.isArray(material)) {
+        material.forEach((item) => item.dispose());
       } else {
-        mesh.material.dispose();
+        material.dispose();
       }
+    };
+
+    const disposeObject = (object: THREE.Object3D) => {
+      object.traverse((child) => {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+          child.geometry.dispose();
+          disposeMaterial(child.material);
+        }
+
+        if (child instanceof THREE.Points) {
+          child.geometry.dispose();
+          disposeMaterial(child.material);
+        }
+      });
     };
 
     // 3D 공간 생성 (물체, 조명 넣는 곳)
@@ -164,8 +177,34 @@ export default function ThreePlayground() {
     scene.add(sunLight);
 
     planetConfigs.forEach((config) => {
-      const orbit = new THREE.Group();
-      scene.add(orbit);
+      const orbitGeometry = new THREE.BufferGeometry();
+      const orbitPoints = [];
+      const segmentCount = 128;
+
+      for (let i = 0; i <= segmentCount; i++) {
+        const angle = (i / segmentCount) * Math.PI * 2;
+
+        orbitPoints.push(
+          new THREE.Vector3(
+            Math.cos(angle) * config.distance,
+            0,
+            Math.sin(angle) * config.distance,
+          ),
+        );
+      }
+
+      orbitGeometry.setFromPoints(orbitPoints);
+
+      const orbitLine = new THREE.Line(
+        orbitGeometry,
+        new THREE.LineBasicMaterial({
+          color: "#ffffff",
+          transparent: true,
+          opacity: 0.25,
+        }),
+      );
+
+      scene.add(orbitLine);
 
       const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(config.size, 32, 32),
@@ -175,12 +214,36 @@ export default function ThreePlayground() {
         }),
       );
 
+      if (config.name === "saturn") {
+        const ringGeometry = new THREE.RingGeometry(
+          config.size * 1.35,
+          config.size * 2.1,
+          96,
+        );
+
+        const ringMaterial = new THREE.MeshStandardMaterial({
+          color: "#d8c48a",
+          roughness: 0.7,
+          metalness: 0.05,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.85,
+        });
+
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+
+        ring.rotation.x = Math.PI / 2.8;
+
+        mesh.add(ring);
+      }
+
       mesh.position.x = Math.cos(config.startAngle) * config.distance;
       mesh.position.z = Math.sin(config.startAngle) * config.distance;
 
-      orbit.add(mesh);
+      scene.add(mesh);
 
       planets.push({
+        name: config.name,
         mesh,
         distance: config.distance,
         angle: config.startAngle,
@@ -189,12 +252,36 @@ export default function ThreePlayground() {
       });
     });
 
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06, 16, 16),
+      new THREE.MeshStandardMaterial({
+        color: "#cfd4d8",
+        roughness: 0.7,
+      }),
+    );
+    scene.add(moon);
+
     const ambientLight = new THREE.AmbientLight("#ffffff", 0.25);
     scene.add(ambientLight);
+
+    let moonAngle = 0;
+    const moonOrbitSpeed = 0.06;
+    const moonDistance = 0.45;
 
     let animationId = 0;
 
     const animate = () => {
+      const earth = planets.find((planet) => planet.name === "earth");
+
+      if (earth) {
+        moonAngle += moonOrbitSpeed;
+
+        moon.position.x =
+          earth.mesh.position.x + Math.cos(moonAngle) * moonDistance;
+
+        moon.position.z =
+          earth.mesh.position.z + Math.sin(moonAngle) * moonDistance;
+      }
       sun.rotation.y += 0.004;
       stars.rotation.y += 0.0002;
 
@@ -203,7 +290,7 @@ export default function ThreePlayground() {
 
         planet.angle += planet.orbitSpeed;
         planet.mesh.position.x = Math.cos(planet.angle) * planet.distance;
-        planet.mesh.position.y = Math.sin(planet.angle) * planet.distance;
+        planet.mesh.position.z = Math.sin(planet.angle) * planet.distance;
       });
 
       renderer.render(scene, camera);
@@ -225,12 +312,7 @@ export default function ThreePlayground() {
       window.cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
 
-      scene.remove(stars);
-      starGeometry.dispose();
-      starMaterial.dispose();
-
-      disposeMesh(sun);
-      planets.forEach((planet) => disposeMesh(planet.mesh));
+      disposeObject(scene);
 
       renderer.dispose();
 
