@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/Addons.js";
+
 import { planetConfigs } from "./solarSystemConfig";
 import {
   createMoon,
@@ -26,6 +28,8 @@ export default function ThreePlayground() {
       angle: number;
       orbitSpeed: number;
       rotationSpeed: number;
+      inclination: number;
+      ascendingNode: number;
     }[] = [];
 
     // 3D 공간 생성 (물체, 조명 넣는 곳)
@@ -44,7 +48,7 @@ export default function ThreePlayground() {
     );
 
     // 카메라 거리
-    camera.position.set(0, 12, 0);
+    camera.position.set(8, 13, 20);
     camera.lookAt(0, 0, 0);
 
     // 카메라가 바라본 3D 장면을 캔버스에 그림, antialias: true 는 계단 현상을 줄여줌
@@ -53,8 +57,22 @@ export default function ThreePlayground() {
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    controls.enableDamping = true; // 움직임을 부드럽게
+    controls.dampingFactor = 0.05; // 움직임 관성정도
+
+    controls.enableZoom = true;
+    controls.minDistance = 2;
+    controls.maxDistance = 35;
+
+    controls.enablePan = true; // 우클릭/드래그로 화면 밀기 활성화
+
+    const SUN_SIZE_SCALE = 0.12;
+    const sunSize = Math.sqrt(109) * SUN_SIZE_SCALE;
+
     const sun = new THREE.Mesh(
-      new THREE.SphereGeometry(0.7, 32, 32),
+      new THREE.SphereGeometry(sunSize, 32, 32),
       new THREE.MeshStandardMaterial({
         color: "#ffcc33",
         emissive: "#ff9900",
@@ -69,7 +87,11 @@ export default function ThreePlayground() {
 
     planetConfigs.forEach((config) => {
       // 궤도
-      const orbitLine = createOrbitLine(config.distance);
+      const orbitLine = createOrbitLine(
+        config.distance,
+        config.inclination,
+        config.ascendingNode,
+      );
       scene.add(orbitLine);
 
       // 행성
@@ -89,6 +111,8 @@ export default function ThreePlayground() {
         angle: config.startAngle,
         orbitSpeed: config.orbitSpeed,
         rotationSpeed: config.rotationSpeed,
+        inclination: config.inclination,
+        ascendingNode: config.ascendingNode,
       });
     });
 
@@ -105,6 +129,31 @@ export default function ThreePlayground() {
     let animationId = 0;
 
     const earth = planets.find((planet) => planet.name === "earth");
+
+    const getOrbitalPosition = (
+      angle: number,
+      distance: number,
+      inclinationDegrees: number,
+      ascendingNodeDegrees: number,
+    ) => {
+      const inclination = THREE.MathUtils.degToRad(inclinationDegrees);
+      const ascendingNode = THREE.MathUtils.degToRad(ascendingNodeDegrees);
+
+      const orbitalX = Math.cos(angle) * distance;
+      const orbitalZ = Math.sin(angle) * distance;
+
+      const rotatedX =
+        orbitalX * Math.cos(ascendingNode) -
+        orbitalZ * Math.cos(inclination) * Math.sin(ascendingNode);
+
+      const rotatedY = orbitalZ * Math.sin(inclination);
+
+      const rotatedZ =
+        orbitalX * Math.sin(ascendingNode) +
+        orbitalZ * Math.cos(inclination) * Math.cos(ascendingNode);
+
+      return new THREE.Vector3(rotatedX, rotatedY, rotatedZ);
+    };
 
     const animate = () => {
       if (earth) {
@@ -123,10 +172,18 @@ export default function ThreePlayground() {
         planet.mesh.rotation.y += planet.rotationSpeed;
 
         planet.angle += planet.orbitSpeed;
-        planet.mesh.position.x = Math.cos(planet.angle) * planet.distance;
-        planet.mesh.position.z = Math.sin(planet.angle) * planet.distance;
+
+        const position = getOrbitalPosition(
+          planet.angle,
+          planet.distance,
+          planet.inclination,
+          planet.ascendingNode,
+        );
+
+        planet.mesh.position.copy(position);
       });
 
+      controls.update();
       renderer.render(scene, camera);
       animationId = window.requestAnimationFrame(animate);
     };
@@ -146,8 +203,9 @@ export default function ThreePlayground() {
       window.cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
 
-      disposeObject(scene);
+      controls.dispose();
 
+      disposeObject(scene);
       renderer.dispose();
 
       if (container.contains(renderer.domElement)) {

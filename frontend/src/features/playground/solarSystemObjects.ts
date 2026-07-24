@@ -8,6 +8,8 @@ export type PlanetConfig = {
     orbitSpeed: number;
     rotationSpeed: number;
     startAngle: number;
+    inclination: number;
+    ascendingNode: number;
 };
 
 export const createStars = () => {
@@ -37,21 +39,35 @@ export const createStars = () => {
     return new THREE.Points(starGeometry, starMaterial);
 };
 
-export const createOrbitLine = (distance: number) => {
+export const createOrbitLine = (
+    distance: number,
+    inclinationDegrees = 0,
+    ascendingNodeDegrees = 0,
+) => {
     const orbitGeometry = new THREE.BufferGeometry();
     const orbitPoints: THREE.Vector3[] = [];
     const segmentCount = 128;
 
+    const inclination = THREE.MathUtils.degToRad(inclinationDegrees);
+    const ascendingNode = THREE.MathUtils.degToRad(ascendingNodeDegrees);
+
     for (let i = 0; i <= segmentCount; i += 1) {
         const angle = (i / segmentCount) * Math.PI * 2;
 
-        orbitPoints.push(
-            new THREE.Vector3(
-                Math.cos(angle) * distance,
-                0,
-                Math.sin(angle) * distance,
-            ),
-        );
+        const orbitalX = Math.cos(angle) * distance;
+        const orbitalZ = Math.sin(angle) * distance;
+
+        const rotatedX =
+            orbitalX * Math.cos(ascendingNode) -
+            orbitalZ * Math.cos(inclination) * Math.sin(ascendingNode);
+
+        const rotatedY = orbitalZ * Math.sin(inclination);
+
+        const rotatedZ =
+            orbitalX * Math.sin(ascendingNode) +
+            orbitalZ * Math.cos(inclination) * Math.cos(ascendingNode);
+
+        orbitPoints.push(new THREE.Vector3(rotatedX, rotatedY, rotatedZ));
     }
 
     orbitGeometry.setFromPoints(orbitPoints);
