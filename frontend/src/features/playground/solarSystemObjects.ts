@@ -7,6 +7,7 @@ export type PlanetConfig = {
     size: number;
     distance: number;
     color: string;
+    texture: string;
     orbitSpeed: number;
     rotationSpeed: number;
     startAngle: number;
@@ -14,7 +15,10 @@ export type PlanetConfig = {
     ascendingNode: number;
 };
 
+const textureLoader = new THREE.TextureLoader();
+
 export const createStars = () => {
+
     const starGeometry = new THREE.BufferGeometry();
     const starCount = 800;
     const starPositions = new Float32Array(starCount * 3);
@@ -85,13 +89,29 @@ export const createOrbitLine = (
 };
 
 export const createPlanet = (config: PlanetConfig) => {
+    const texture = textureLoader.load(config.texture);
+    texture.colorSpace = THREE.SRGBColorSpace;
+
     const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(config.size, 32, 32),
         new THREE.MeshStandardMaterial({
-            color: config.color,
-            roughness: 0.6,
+            map: texture,
+            color: "#ffffff",
+            roughness: 0.75,
         }),
     );
+
+    const hitArea = new THREE.Mesh(
+        new THREE.SphereGeometry(Math.max(config.size * 2.2, 0.35), 16, 16),
+        new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+        }),
+    );
+
+    hitArea.name = `${config.name}-hit-area`;
+    mesh.add(hitArea);
 
     mesh.position.x = Math.cos(config.startAngle) * config.distance;
     mesh.position.z = Math.sin(config.startAngle) * config.distance;
@@ -100,29 +120,48 @@ export const createPlanet = (config: PlanetConfig) => {
 };
 
 export const createSaturnRing = (planetSize: number) => {
-    const ring = new THREE.Mesh(
-        new THREE.RingGeometry(planetSize * 1.35, planetSize * 2.1, 96),
-        new THREE.MeshStandardMaterial({
-            color: "#d8c48a",
-            roughness: 0.7,
-            metalness: 0.05,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.85,
-        }),
-    );
+    const group = new THREE.Group();
 
-    ring.rotation.x = Math.PI / 2.8;
+    const rings = [
+        { inner: 1.35, outer: 1.55, color: "#c7b06b", opacity: 0.65 },
+        { inner: 1.58, outer: 1.85, color: "#e0cf91", opacity: 0.75 },
+        { inner: 1.9, outer: 2.15, color: "#8f7a52", opacity: 0.45 },
+        { inner: 2.18, outer: 2.42, color: "#d8c48a", opacity: 0.6 },
+    ];
 
-    return ring;
+    rings.forEach((ringConfig) => {
+        const ring = new THREE.Mesh(
+            new THREE.RingGeometry(
+                planetSize * ringConfig.inner,
+                planetSize * ringConfig.outer,
+                128,
+            ),
+            new THREE.MeshStandardMaterial({
+                color: ringConfig.color,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: ringConfig.opacity,
+                roughness: 0.8,
+            }),
+        );
+
+        ring.rotation.x = Math.PI / 2.8;
+        group.add(ring);
+    });
+
+    return group;
 };
 
 export const createMoon = () => {
+    const moonTexture = textureLoader.load("/textures/moon.jpg");
+    moonTexture.colorSpace = THREE.SRGBColorSpace;
+
     return new THREE.Mesh(
-        new THREE.SphereGeometry(0.06, 16, 16),
+        new THREE.SphereGeometry(0.08, 32, 32),
         new THREE.MeshStandardMaterial({
-            color: "#cfd4d8",
-            roughness: 0.7,
+            map: moonTexture,
+            color: "#",
+            roughness: 0.85,
         }),
     );
 };

@@ -68,6 +68,19 @@ export default function ThreePlayground() {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
+    const findPlanetByObject = (object: THREE.Object3D) => {
+      return planets.find((planet) => {
+        let current: THREE.Object3D | null = object;
+
+        while (current) {
+          if (current === planet.mesh) return true;
+          current = current.parent;
+        }
+
+        return false;
+      });
+    };
+
     const handleClick = (event: MouseEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
 
@@ -77,15 +90,14 @@ export default function ThreePlayground() {
       raycaster.setFromCamera(pointer, camera);
 
       const planetMeshes = planets.map((planet) => planet.mesh);
-      const intersects = raycaster.intersectObjects(planetMeshes);
+      const intersects = raycaster.intersectObjects(planetMeshes, true);
 
       if (intersects.length === 0) {
         setSelectedPlanet(null);
         return;
       }
 
-      const selectedMesh = intersects[0].object;
-      const selected = planets.find((planet) => planet.mesh === selectedMesh);
+      const selected = findPlanetByObject(intersects[0].object);
 
       if (!selected) return;
 
@@ -112,17 +124,37 @@ export default function ThreePlayground() {
     const SUN_SIZE_SCALE = 0.12;
     const sunSize = Math.sqrt(109) * SUN_SIZE_SCALE;
 
+    const textureLoader = new THREE.TextureLoader();
+    const sunTexture = textureLoader.load("/textures/sun.jpg");
+    sunTexture.colorSpace = THREE.SRGBColorSpace;
+
     const sun = new THREE.Mesh(
-      new THREE.SphereGeometry(sunSize, 32, 32),
+      new THREE.SphereGeometry(sunSize, 64, 64),
       new THREE.MeshStandardMaterial({
-        color: "#ffcc33",
-        emissive: "#ff9900",
-        emissiveIntensity: 1.2,
+        map: sunTexture,
+        emissive: "#ff9f1c",
+        emissiveMap: sunTexture,
+        emissiveIntensity: 1.8,
+        roughness: 1,
       }),
     );
     scene.add(sun);
 
-    const sunLight = new THREE.PointLight("#ffffff", 2, 20);
+    const sunGlow = new THREE.Mesh(
+      new THREE.SphereGeometry(sunSize * 1.03, 32, 32),
+      new THREE.MeshBasicMaterial({
+        color: "#ffb347",
+        transparent: true,
+        opacity: 0.22,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        depthWrite: false,
+      }),
+    );
+
+    sun.add(sunGlow);
+
+    const sunLight = new THREE.PointLight("#fff4dc", 3.2, 80);
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
@@ -162,7 +194,7 @@ export default function ThreePlayground() {
     const moon = createMoon();
     scene.add(moon);
 
-    const ambientLight = new THREE.AmbientLight("#ffffff", 0.25);
+    const ambientLight = new THREE.AmbientLight("#ffffff", 0.12);
     scene.add(ambientLight);
 
     let moonAngle = 0;
@@ -208,7 +240,7 @@ export default function ThreePlayground() {
         moon.position.z =
           earth.mesh.position.z + Math.sin(moonAngle) * moonDistance;
       }
-      sun.rotation.y += 0.004;
+      sun.rotation.y += 0.002;
       stars.rotation.y += 0.0002;
 
       planets.forEach((planet) => {
@@ -243,14 +275,14 @@ export default function ThreePlayground() {
     window.addEventListener("resize", handleResize);
 
     return () => {
+      renderer.domElement.removeEventListener("click", handleClick);
+
       window.cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
 
       controls.dispose();
-
       disposeObject(scene);
       renderer.dispose();
-      renderer.domElement.removeEventListener("click", handleClick);
 
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
