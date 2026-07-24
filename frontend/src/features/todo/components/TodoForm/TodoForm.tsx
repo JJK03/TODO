@@ -21,7 +21,7 @@ const CalendarIcon = () => (
 );
 
 const splitDueDate = (dueDate: string) => {
-  const [date = "", time = ""] = dueDate.split("T");
+  const [date = "", time = ""] = dueDate.split("T"); // dueDate 형식: "2026-07-24T14:30:00"
   return { date, time };
 };
 
@@ -87,7 +87,7 @@ export default function TodoForm({
           <div className="due-date-popover">
             <label>
               <span className="due-date-label-row">
-                날짜
+                마감일
                 {dueDate && (
                   <button
                     className="due-date-clear"
@@ -106,7 +106,7 @@ export default function TodoForm({
             </label>
 
             <label>
-              시간
+              마감시간
               <input
                 type="time"
                 value={dueTimeSet ? time : ""}
