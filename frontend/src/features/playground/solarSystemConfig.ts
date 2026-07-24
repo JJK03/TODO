@@ -19,6 +19,8 @@ const scaleOrbitSpeed = (orbitalPeriodDays: number) => {
 export const planetConfigs: PlanetConfig[] = [
     {
         name: "mercury",
+        label: "수성",
+        description: "태양에 가장 가까운 행성입니다. 대기가 거의 없어 낮과 밤의 온도 차이가 매우 큽니다.",
         size: scalePlanetSize(0.383),
         distance: scaleOrbitDistance(0.39),
         color: "#a6a6a6",
@@ -30,6 +32,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "venus",
+        label: "금성",
+        description: "두꺼운 이산화탄소 대기와 강한 온실 효과를 가진 행성입니다. 표면 온도가 태양계 행성 중 가장 높습니다.",
         size: scalePlanetSize(0.949),
         distance: scaleOrbitDistance(0.72),
         color: "#d8b26e",
@@ -41,6 +45,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "earth",
+        label: "지구",
+        description: "액체 상태의 물과 생명체가 존재하는 것으로 알려진 유일한 행성입니다. 대기와 자기장이 표면 환경을 보호합니다.",
         size: scalePlanetSize(1),
         distance: scaleOrbitDistance(1),
         color: "#3b82f6",
@@ -52,6 +58,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "mars",
+        label: "화성",
+        description: "붉은 산화철 먼지로 덮인 행성입니다. 과거에 물이 흘렀던 흔적이 발견되어 탐사 대상이 되고 있습니다.",
         size: scalePlanetSize(0.532),
         distance: scaleOrbitDistance(1.52),
         color: "#d97745",
@@ -63,6 +71,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "jupiter",
+        label: "목성",
+        description: "태양계에서 가장 큰 행성입니다. 거대한 대기 소용돌이인 대적점과 많은 위성을 가지고 있습니다.",
         size: scalePlanetSize(11.21),
         distance: scaleOrbitDistance(5.2),
         color: "#d6a36a",
@@ -74,6 +84,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "saturn",
+        label: "토성",
+        description: "크고 뚜렷한 고리로 유명한 가스 행성입니다. 고리는 얼음과 암석 조각들로 이루어져 있습니다.",
         size: scalePlanetSize(9.45),
         distance: scaleOrbitDistance(9.58),
         color: "#e5c77f",
@@ -85,6 +97,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "uranus",
+        label: "천왕성",
+        description: "자전축이 크게 기울어져 옆으로 누운 채 도는 것처럼 보이는 얼음 행성입니다. 푸른빛은 대기의 메탄 때문입니다.",
         size: scalePlanetSize(4.01),
         distance: scaleOrbitDistance(19.2),
         color: "#7dd3fc",
@@ -96,6 +110,8 @@ export const planetConfigs: PlanetConfig[] = [
     },
     {
         name: "neptune",
+        label: "해왕성",
+        description: "태양에서 가장 멀리 있는 행성입니다. 강한 바람과 짙은 푸른색 대기를 가진 얼음 행성입니다.",
         size: scalePlanetSize(3.88),
         distance: scaleOrbitDistance(30.05),
         color: "#2563eb",

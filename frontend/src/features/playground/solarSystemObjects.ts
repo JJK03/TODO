@@ -2,6 +2,8 @@ import * as THREE from "three";
 
 export type PlanetConfig = {
     name: string;
+    label: string;
+    description: string;
     size: number;
     distance: number;
     color: string;

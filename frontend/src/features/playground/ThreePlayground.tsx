@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
@@ -16,6 +16,12 @@ import "./ThreePlayground.css";
 export default function ThreePlayground() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const [selectedPlanet, setSelectedPlanet] = useState<{
+    name: string;
+    label: string;
+    description: string;
+  } | null>(null);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -23,6 +29,8 @@ export default function ThreePlayground() {
 
     const planets: {
       name: string;
+      label: string;
+      description: string;
       mesh: THREE.Mesh;
       distance: number;
       angle: number;
@@ -56,6 +64,39 @@ export default function ThreePlayground() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    const handleClick = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+
+      const planetMeshes = planets.map((planet) => planet.mesh);
+      const intersects = raycaster.intersectObjects(planetMeshes);
+
+      if (intersects.length === 0) {
+        setSelectedPlanet(null);
+        return;
+      }
+
+      const selectedMesh = intersects[0].object;
+      const selected = planets.find((planet) => planet.mesh === selectedMesh);
+
+      if (!selected) return;
+
+      setSelectedPlanet({
+        name: selected.name,
+        label: selected.label,
+        description: selected.description,
+      });
+    };
+
+    renderer.domElement.addEventListener("click", handleClick);
 
     const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -106,6 +147,8 @@ export default function ThreePlayground() {
 
       planets.push({
         name: config.name,
+        label: config.label,
+        description: config.description,
         mesh,
         distance: config.distance,
         angle: config.startAngle,
@@ -207,6 +250,7 @@ export default function ThreePlayground() {
 
       disposeObject(scene);
       renderer.dispose();
+      renderer.domElement.removeEventListener("click", handleClick);
 
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -214,5 +258,25 @@ export default function ThreePlayground() {
     };
   }, []);
 
-  return <div className="three-playground" ref={containerRef} />;
+  return (
+    <div className="three-playground-wrapper">
+      <div className="three-playground" ref={containerRef} />
+
+      {selectedPlanet && (
+        <aside className="planet-detail-panel">
+          <button
+            type="button"
+            className="planet-detail-close"
+            onClick={() => setSelectedPlanet(null)}
+            aria-label="닫기"
+          >
+            ✖
+          </button>
+
+          <h2>{selectedPlanet.label}</h2>
+          <p>{selectedPlanet.description}</p>
+        </aside>
+      )}
+    </div>
+  );
 }
